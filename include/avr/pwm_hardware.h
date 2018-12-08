@@ -14,26 +14,26 @@
 
 #pragma once
 
-#include <timer.h>
+#include "timer.h"
 
 /** Set PWM value
  *  @e no_ch  timer number and channel (e.g. 0,A)
  *  @e val    value
  */
-#define pwmSet(no_ch, val) TMR_SET_OCR2(no_ch, val)
+#define hwPwmSet(no_ch, val) TMR_SET_OCR2(no_ch, val)
 
 /** Get PWM value */
-#define pwmGet(no_ch) TMR_GET_OCR2(no_ch)
+#define hwPwmGet(no_ch) TMR_GET_OCR2(no_ch)
 
 /** Set prescaler for PWM timer */
-#define pwmSetPrescaler(no_ch, val) TMR_SET_PRESCALER(no_ch, val)
+#define hwPwmSetPrescaler(no_ch, val) TMR_SET_PRESCALER(no_ch, val)
 
 /** Stop PWM
  *  Equivalent to calling pwmSet(no_ch, 0)
  */
-#define pwmStop(no_ch) pwmSet(no_ch, 0)
+#define hwPwmStop(no_ch) hwPwmSet(no_ch, 0)
 
-enum class PwmOutput
+enum class HwPwmOutput
 {
    OC0A = 0x01,
    OC0B = 0x02,
@@ -41,14 +41,14 @@ enum class PwmOutput
    OC2B = 0x08,
 };
 
-enum class PwmDirection
+enum class HwPwmDirection
 {
    Normal,
    Inverted
 };
 
 /** Initialise hardware PWM */
-template <PwmOutput output, PwmDirection direction>
-void pwmInit();
+template <HwPwmOutput output, HwPwmDirection direction>
+void hwPwmInit();
 
 #include "pwm_hardware_priv.h"
