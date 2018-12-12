@@ -11,6 +11,7 @@ set(GOOGLETEST_DIR "/usr/src/googletest" CACHE STRING "Location of googletest so
 add_subdirectory(${GOOGLETEST_DIR} gtest)
 
 set(tests_unit_sources
+    test_fifo.cpp
     test_ringbuffer.cpp
 )
 
