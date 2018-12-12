@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 3.2)
+
+set(CMAKE_CXX_STANDARD 17)
+
+if(UNIX)
+    add_compile_options(-Wall -Wextra)
+endif()
+
+set(GOOGLETEST_DIR "/usr/src/googletest" CACHE STRING "Location of googletest sources")
+
+add_subdirectory(${GOOGLETEST_DIR} gtest)
+
+set(tests_unit_sources
+    test_ringbuffer.cpp
+)
+
+add_executable(tests_unit main.cpp ${tests_unit_sources})
+target_include_directories(tests_unit
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/../include
+)
+target_link_libraries(tests_unit PRIVATE gtest)
