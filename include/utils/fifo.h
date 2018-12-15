@@ -29,21 +29,21 @@ public:
 
    Fifo();
 
-   bool isEmpty() const;
-   bool isFull() const;
+   bool isEmpty() const volatile;
+   bool isFull() const volatile;
    /// Return the number of entries in the FIFO
-   size_type count() const;
-   constexpr size_type capacity() const
+   size_type count() const volatile;
+   constexpr size_type capacity() const volatile
    { return static_cast<size_type>(buffer_size); }
    /// Write a value into the FIFO.
    /// @return false if the FIFO is full and the value could not be added
-   bool write(T value);
+   bool write(T value) volatile;
    /// Read a value from the FIFO. If the FIFO is empty, returns zero.
-   T read();
+   T read() volatile;
 
 private:
    /// new value of the write index when inserting @e itemCount values
-   size_type writeIndexWhenAddingItems(size_type itemCount) const
+   size_type writeIndexWhenAddingItems(size_type itemCount) const volatile
    { return (m_writeIndex + itemCount) & (capacity() - 1); }
 
    size_type m_readIndex;
@@ -60,26 +60,26 @@ Fifo<T, buffer_size, S>::Fifo()
 }
 
 template <typename T, size_t buffer_size, typename S>
-bool Fifo<T, buffer_size, S>::isEmpty() const
+bool Fifo<T, buffer_size, S>::isEmpty() const volatile
 {
    return m_readIndex == m_writeIndex;
 }
 
 template <typename T, size_t buffer_size, typename S>
-bool Fifo<T, buffer_size, S>::isFull() const
+bool Fifo<T, buffer_size, S>::isFull() const volatile
 {
    const auto newWriteIndex = writeIndexWhenAddingItems(1);
    return newWriteIndex == m_readIndex;
 }
 
 template <typename T, size_t buffer_size, typename S>
-typename Fifo<T, buffer_size, S>::size_type Fifo<T, buffer_size, S>::count() const
+typename Fifo<T, buffer_size, S>::size_type Fifo<T, buffer_size, S>::count() const volatile
 {
    return (m_writeIndex - m_readIndex) & (capacity() - 1);
 }
 
 template <typename T, size_t buffer_size, typename S>
-bool Fifo<T, buffer_size, S>::write(T value)
+bool Fifo<T, buffer_size, S>::write(T value) volatile
 {
    const auto newWriteIndex = writeIndexWhenAddingItems(1);
    const bool isFull = newWriteIndex == m_readIndex;
@@ -96,7 +96,7 @@ bool Fifo<T, buffer_size, S>::write(T value)
 }
 
 template <typename T, size_t buffer_size, typename S>
-T Fifo<T, buffer_size, S>::read()
+T Fifo<T, buffer_size, S>::read() volatile
 {
    if (isEmpty())
    {
