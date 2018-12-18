@@ -15,9 +15,11 @@ set(tests_unit_sources
     test_ringbuffer.cpp
 )
 
+set(INC_DIR ${CMAKE_SOURCE_DIR}/../../include)
+
 add_executable(tests_unit main.cpp ${tests_unit_sources})
 target_include_directories(tests_unit
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/../include
+        ${INC_DIR}
 )
 target_link_libraries(tests_unit PRIVATE gtest)
