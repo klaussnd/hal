@@ -37,8 +37,10 @@ enum class HwPwmOutput
 {
    OC0A = 0x01,
    OC0B = 0x02,
-   OC2A = 0x04,
-   OC2B = 0x08,
+   OC1A = 0x04,
+   OC1B = 0x08,
+   OC2A = 0x10,
+   OC2B = 0x20,
 };
 
 enum class HwPwmDirection
@@ -47,7 +49,12 @@ enum class HwPwmDirection
    Inverted
 };
 
-/** Initialise hardware PWM */
+/** Initialise hardware PWM
+ *
+ *  This function configures the output pins and PWM settings. The corresponding
+ *  timer(s) are not started. In order to use the PWM output, you must also start
+ *  the timer(s).
+ */
 template <HwPwmOutput output, HwPwmDirection direction>
 void hwPwmInit();
 
