@@ -37,5 +37,5 @@ avr_target_include_directories(test_adc
 )
 avr_target_compile_definitions(test_adc
     PRIVATE
-        ADC_INTERNAL_REF=1
+        ADC_REF_AVCC=1
 )
