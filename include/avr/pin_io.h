@@ -28,6 +28,8 @@
 #ifndef PIN_IO_H
 #define PIN_IO_H
 
+#include <avr/io.h>
+
 /* Macros for setting or reading a certain I/O pin. Those macros help to make the code portable.
  * Changing the pin only requires changing one define.
  *
