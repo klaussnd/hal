@@ -197,6 +197,10 @@
 #define TMR_SET_PRE(tmr_no, pre) \
    TMR_TCCR ## tmr_no = ((TMR_TCCR ## tmr_no) & ~(TMR ## tmr_no ## _PRE_MASK)) | (TMR ## tmr_no ## _PRE_ ## pre)
 
+#define TMR_SET_CTC_X(tmr_no) \
+   TCCR ## tmr_no &= ~(1<<WGM ## tmr_no ## 0); \
+   TCCR ## tmr_no |= (1<<WGM ## tmr_no ## 1)
+
 #if defined __AVR_ATmega32__ || defined __AVR_ATmega16__
  #define TMR0_OCR(ch) OCR0
 #elif defined __AVR_ATmega8__
