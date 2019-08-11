@@ -17,26 +17,15 @@
 
 namespace
 {
+   void setWriteIrq();
+   void deactivateWriteIrq();
+
    // Temporarily deactivate interrupts for receive buffer for atomic access
    class AtomicBlockReceive
    {
    public:
       AtomicBlockReceive();
       ~AtomicBlockReceive();
-
-   private:
-      uint8_t m_originalState;
-   };
-
-   // Temporarily deactivate interrupts for send buffer for atomic access
-   class AtomicBlockSend
-   {
-   public:
-      AtomicBlockSend();
-      ~AtomicBlockSend();
-
-      void deactivateIrq();
-      void activateIrq();
 
    private:
       uint8_t m_originalState;
@@ -125,39 +114,32 @@ uint8_t usartWriteImpl(const char* buf, const uint8_t length, const MemoryLocati
 
    /* de-activate interrupts to avoid writing the global buffer
       during an interrupt */
+   deactivateWriteIrq();
+   /* Copy data into buffer */
+   char chr;
+   for (ind = 0;
+        ((chr = (memory == MemoryLocation::PROGRAM_SPACE) ? pgm_read_byte(buf) : *buf)
+            != '\0'
+         && length == 0)
+        || (ind < length);
+        ++ind, ++buf)
    {
-      AtomicBlockSend lock;
-      /* Copy data into buffer */
-      char chr;
-      for (ind = 0;
-           ((chr = (memory == MemoryLocation::PROGRAM_SPACE) ? pgm_read_byte(buf) : *buf)
-               != '\0'
-            && length == 0)
-           || (ind < length);
-           ++ind, ++buf)
+      /* If the transmit buffer is full, wait until we have space again.
+         We need to temorarily re-enable interrupts for the transmit
+         to be conducted by the ISR
+         If data can be written just now, no interrupt is generated
+         automatically. Thus manually trigger it in this case. */
+      while (m_usart_data.send.isFull())
       {
-         while (m_usart_data.send.isFull())
-         {
-            /* transmit buffer is full, wait until we have space again
-               we need to temorarily re-enable interrupts for the transmit
-               to be conducted by the ISR */
-            lock.activateIrq();
-            _delay_ms(50);
-            lock.deactivateIrq();
-         }
-         m_usart_data.send.write(chr);
+         setWriteIrq();
+         _delay_ms(50);
+         deactivateWriteIrq();
       }
-      /* re-aktivate interrupt */
+      m_usart_data.send.write(chr);
    }
-/* If data can be written just now, no interrupt is generated
-   automatically. Thus manually trigger it in this case. */
-#ifdef UCSR0A
-   if (UCSR0A & (1 << UDRE0))
-      UCSR0B |= (1 << UDRIE0);
-#else
-   if (UCSRA & (1 << UDRE))
-      UCSRB |= (1 << UDRIE);
-#endif
+   /* Enable write interrupt. If data can be written just now, interrupt is not generated
+      automatically. */
+   setWriteIrq();
 
    return ind;
 }
@@ -181,7 +163,9 @@ ISR(USART_RXC_vect)
    {
       m_usart_data.recv.fifo.write(chr);
       if (chr == '\n')
+      {
          ++m_usart_data.recv.newline_count;
+      }
    }
 }
 
@@ -201,17 +185,34 @@ ISR(USART_UDRE_vect)
 #else
       UDR = chr;
 #endif
-   } else
+   }
+   else
+   {
       /* no more data, disable interrupt */
+      deactivateWriteIrq();
+   }
+}
+
+namespace
+{
+   inline void setWriteIrq()
+   {
+#ifdef UCSR0A
+      UCSR0B |= (1 << UDRIE0);
+#else
+      UCSRB |= (1 << UDRIE);
+#endif
+   }
+
+   inline void deactivateWriteIrq()
+   {
 #ifdef UCSR0B
       UCSR0B &= ~(1<<UDRIE0);
 #else
       UCSRB &= ~(1<<UDRIE);
 #endif
-}
+   }
 
-namespace
-{
    AtomicBlockReceive::AtomicBlockReceive()
       : m_originalState(
 #ifdef UCSR0B
@@ -234,45 +235,6 @@ namespace
       UCSR0B |= m_originalState;
 #else
       UCSRB |= m_originalState;
-#endif
-   }
-
-   AtomicBlockSend::AtomicBlockSend()
-      : m_originalState(
-#ifdef UCSR0B
-           UCSR0B & (1<<UDRIE0)
-#else
-           UCSRB & (1<<UDRIE)
-#endif
-           )
-   {
-      deactivateIrq();
-   }
-
-   AtomicBlockSend::~AtomicBlockSend()
-   {
-#ifdef UCSR0B
-      UCSR0B |= m_originalState;
-#else
-      UCSRB |= m_originalState;
-#endif
-   }
-
-   void AtomicBlockSend::deactivateIrq()
-   {
-#ifdef UCSR0B
-      UCSR0B &= ~(1<<UDRIE0);
-#else
-      UCSRB &= ~(1<<UDRIE);
-#endif
-   }
-
-   void AtomicBlockSend::activateIrq()
-   {
-#ifdef UCSR0B
-      UCSR0B |= (1<<UDRIE0);
-#else
-      UCSRB |= (1<<UDRIE);
 #endif
    }
 }
