@@ -81,10 +81,11 @@ class AFilledAndEmptiedFifo : public AFifo
 {
    void SetUp() override
    {
-      for (uint8_t i = 0; i < BUFFER_SIZE - 2; ++i)
+      for (uint8_t i = 0; i < BUFFER_SIZE - 1; ++i)
       {
          fifo.write(i);
       }
+      ASSERT_TRUE(fifo.isFull());
       while (!fifo.isEmpty())
       {
          fifo.read();

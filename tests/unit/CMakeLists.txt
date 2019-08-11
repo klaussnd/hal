@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
+project(unittests)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -22,4 +23,4 @@ target_include_directories(tests_unit
     PRIVATE
         ${INC_DIR}
 )
-target_link_libraries(tests_unit PRIVATE gtest)
+target_link_libraries(tests_unit PRIVATE gmock)
