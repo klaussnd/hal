@@ -39,7 +39,7 @@ private:
    template <bool enabled, HwPwmDirection direction>
    static typename std::enable_if<enabled>::type initOC0A()
    {
-      SET_OUTPUT(PIN_OC0A);
+      confPinAsOutput(PIN_OC0A);
       TMR_SET_OCR2(0, A, 0);
 
 #ifdef TCCR0A
@@ -65,7 +65,7 @@ private:
    template <bool enabled, HwPwmDirection direction>
    static typename std::enable_if<enabled>::type initOC0B()
    {
-      SET_OUTPUT(PIN_OC0B);
+      confPinAsOutput(PIN_OC0B);
       TMR_SET_OCR2(0, B, 0);
 
 #ifdef TCCR0A
@@ -91,7 +91,7 @@ private:
    template <bool enabled, HwPwmDirection direction>
    static typename std::enable_if<enabled>::type initOC1A()
    {
-      SET_OUTPUT(PIN_OC1A);
+      confPinAsOutput(PIN_OC1A);
       TMR_SET_OCR2(1, A, 0);
 
       // phase correct PWM 8bit
@@ -113,7 +113,7 @@ private:
    template <bool enabled, HwPwmDirection direction>
    static typename std::enable_if<enabled>::type initOC1B()
    {
-      SET_OUTPUT(PIN_OC1B);
+      confPinAsOutput(PIN_OC1B);
       TMR_SET_OCR2(1, B, 0);
 
       // phase correct PWM 8bit
@@ -135,7 +135,7 @@ private:
    template <bool enabled, HwPwmDirection direction>
    static typename std::enable_if<enabled>::type initOC2A()
    {
-      SET_OUTPUT(PIN_OC2A);
+      confPinAsOutput(PIN_OC2A);
       TMR_SET_OCR2(2, A, 0);
 
 #ifdef TCCR2A
@@ -167,7 +167,7 @@ private:
    template <bool enabled, HwPwmDirection direction>
    static typename std::enable_if<enabled>::type initOC2B()
    {
-      SET_OUTPUT(PIN_OC2B);
+      confPinAsOutput(PIN_OC2B);
       TMR_SET_OCR2(2, B, 0);
 
 #ifdef TCCR2A

@@ -48,8 +48,8 @@ namespace
 
 void usartInitImpl()
 {
-   SET_OUTPUT(PIN_USART_TX);
-   SET_INPUT(PIN_USART_RX);
+   confPinAsOutput(PIN_USART_TX);
+   confPinAsInput(PIN_USART_RX);
 
 #if defined UCSR0B
    UCSR0B |= (1<<TXEN0)|(1<<RXEN0); // enable UART TX / RX

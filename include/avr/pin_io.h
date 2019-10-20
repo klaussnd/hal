@@ -36,58 +36,57 @@
  * Example:
  * @code
  * #define LED   D,5
- * SET_OUTPUT(LED);
- * SET(LED);
+ * confPinAsOutput(LED);
+ * pinSetHigh(LED);
  * @endcode
  */
 #if defined(__DOXYGEN__)
 
-#define RESET(x)   /**< Set a pin to zero */
-#define SET(x)     /**< Set a pin to one */
-#define	TOGGLE(x)  /**< Toggle a pin */
+#define pinSetLow(x)   /**< Set a pin to zero */
+#define pinSetHigh(x)  /**< Set a pin to one */
+#define pinToggle(x)   /**< Toggle a pin */
 
-#define	SET_OUTPUT(x)            /**< Set a pin as output */
-#define	SET_INPUT(x)             /**< Set a pin as input */
-#define	SET_PULLUP(x)            /**< Activates pullup resistor of a pin (if it is set as input) */
-#define	SET_INPUT_WITH_PULLUP(x) /**< Set a pin as input with activated pullup resistor */
-#define	IS_SET(x)                /**< Check state of a pin */
+#define confPinAsOutput(x)          /**< Set a pin as output */
+#define confPinAsInput(x)           /**< Set a pin as input */
+#define enablePinPullup(x)          /**< Activates pullup resistor of a pin (if it is set as input) */
+#define confPinAsInputWithPullup(x) /**< Set a pin as input with activated pullup resistor */
+#define pinIsSet(x)                 /**< Check state of a pin */
 
 #else /* !DOXYGEN */
 
 /* Warum hier zum Teil so seltsame Konstrukte notwendig sind wird zum Beispiel
  * in http://www.mikrocontroller.net/forum/read-1-324854.html#324980 erklärt. */
-#define	PORT(x)			_port2(x)
-#define	DDR(x)			_ddr2(x)
-#define	PIN(x)			_pin2(x)
-#define	REG(x)			_reg(x)
-#define	PIN_NUM(x)		_pin_num(x)
+#define PORT(x)    _port2(x)
+#define DDR(x)     _ddr2(x)
+#define PIN(x)     _pin2(x)
+#define REG(x)     _reg(x)
+#define PIN_NUM(x) _pin_num(x)
 
-#define	RESET(x)		RESET2(x)
-#define	SET(x)			SET2(x)
-#define	TOGGLE(x)		TOGGLE2(x)
-#define	SET_OUTPUT(x)	SET_OUTPUT2(x)
-#define	SET_INPUT(x)	SET_INPUT2(x)
-#define	SET_PULLUP(x)	SET2(x)
-#define	IS_SET(x)		IS_SET2(x)
+#define pinSetLow(x)                 RESET2(x)
+#define pinSetHigh(x)                SET2(x)
+#define pinToggle(x)                 TOGGLE2(x)
+#define confPinAsOutput(x)           SET_OUTPUT2(x)
+#define confPinAsInput(x)            SET_INPUT2(x)
+#define enablePinPullup(x)           SET2(x)
+#define pinIsSet(x)                  IS_SET2(x)
+#define confPinAsInputWithPullup(x)  SET_INPUT_WITH_PULLUP2(x)
 
-#define	SET_INPUT_WITH_PULLUP(x)	SET_INPUT_WITH_PULLUP2(x)
+#define _port2(x) PORT ## x
+#define _ddr2(x)  DDR ## x
+#define _pin2(x)  PIN ## x
 
-#define	_port2(x)	PORT ## x
-#define	_ddr2(x)	DDR ## x
-#define	_pin2(x)	PIN ## x
+#define _reg(x,y)     x
+#define _pin_num(x,y) y
 
-#define	_reg(x,y)		x
-#define	_pin_num(x,y)	y
+#define RESET2(x,y)   PORT(x) &= ~(1<<y)
+#define SET2(x,y)     PORT(x) |= (1<<y)
+#define TOGGLE2(x,y)  PORT(x) ^= (1<<y)
 
-#define	RESET2(x,y)		PORT(x) &= ~(1<<y)
-#define	SET2(x,y)		PORT(x) |= (1<<y)
-#define	TOGGLE2(x,y)	PORT(x) ^= (1<<y)
+#define SET_OUTPUT2(x,y)            DDR(x) |= (1<<y)
+#define SET_INPUT2(x,y)             DDR(x) &= ~(1<<y)
+#define SET_INPUT_WITH_PULLUP2(x,y) SET_INPUT2(x,y);SET2(x,y)
 
-#define	SET_OUTPUT2(x,y)	DDR(x) |= (1<<y)
-#define	SET_INPUT2(x,y)		DDR(x) &= ~(1<<y)
-#define	SET_INPUT_WITH_PULLUP2(x,y)	SET_INPUT2(x,y);SET2(x,y)
-
-#define	IS_SET2(x,y)	((PIN(x) & (1<<y)) != 0)
+#define IS_SET2(x,y) ((PIN(x) & (1<<y)) != 0)
 
 #endif /* !DOXYGEN */
 
