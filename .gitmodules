@@ -1,3 +1,6 @@
 [submodule "cmake-avr"]
 	path = cmake-avr
 	url = https://github.com/mkleemann/cmake-avr.git
+[submodule "avr-libstdcpp"]
+	path = avr-libstdcpp
+	url = https://github.com/modm-io/avr-libstdcpp.git
