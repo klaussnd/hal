@@ -44,6 +44,7 @@ avr_target_compile_definitions(test_adc
 add_avr_executable(test_rotary_encoder
    test_rotary_encoder.cpp
    ${SOURCE_DIR}/hal/avr/input/rotary_encoder.cpp
+   ${SOURCE_DIR}/hal/avr/input/button.cpp
    ${SOURCE_DIR}/hal/avr/usart_irq.cpp
    ${SOURCE_DIR}/hal/avr/usart_stdout.c
 )
@@ -56,4 +57,6 @@ avr_target_compile_definitions(test_rotary_encoder
     PRIVATE
         ROTARY_PHASE_A_PIN=B,0
         ROTARY_PHASE_B_PIN=B,1
+        BUTTON_PORT=D
+        BUTTON_MASK=0x40
 )
