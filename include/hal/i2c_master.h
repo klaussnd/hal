@@ -6,7 +6,7 @@ enum class I2cStatus
 {
    SUCCESS,
    START_ERROR,
-   TRANSMIT_ERROR,
+   TRANSMISSION_ERROR,
    ACK_ERROR,
 };
 
