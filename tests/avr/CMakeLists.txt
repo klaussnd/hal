@@ -60,3 +60,18 @@ avr_target_compile_definitions(test_rotary_encoder
         BUTTON_PORT=D
         BUTTON_MASK=0x40
 )
+
+add_avr_executable(test_i2c_si7021
+   test_i2c_si7021.cpp
+   ${SOURCE_DIR}/hal/avr/i2c_master_general.cpp
+   ${SOURCE_DIR}/hal/avr/i2c_master_twi.cpp
+   ${SOURCE_DIR}/hal/avr/i2c_master_detail.h
+   ${SOURCE_DIR}/hal/avr/usart_irq.cpp
+   ${SOURCE_DIR}/hal/avr/usart_stdout.c
+   ${SOURCE_DIR}/hal/sensor/si7021.cpp
+)
+avr_target_include_directories(test_i2c_si7021
+    PRIVATE
+        ${INC_DIR}
+        ${STDCPP_INC_DIR}
+)
