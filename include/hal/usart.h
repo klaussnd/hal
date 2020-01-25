@@ -17,8 +17,13 @@
 #include <stdint.h>
 
 /** Initialise the usart */
+#ifdef __AVR
 template <unsigned long baudrate>
 void usartInit();
+#elif defined __linux
+bool usartInit(const char* device, unsigned long baudrate);
+void usartFinalise();
+#endif
 
 /** Return true if a complete line is available to be read in text mode */
 bool usartAvailReadLine();

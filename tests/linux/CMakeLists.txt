@@ -11,6 +11,15 @@ endif()
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../src)
 set(INC_DIR ${CMAKE_SOURCE_DIR}/../../include)
 
+add_executable(test_usart
+    test_usart.cpp
+    ${SOURCE_DIR}/hal/linux/usart.cpp
+)
+target_include_directories(test_usart
+   PRIVATE
+      ${INC_DIR}
+)
+
 add_executable(test_sensor_i2c
     test_sensor_i2c.cpp
     ${SOURCE_DIR}/hal/linux/i2c_master.cpp
