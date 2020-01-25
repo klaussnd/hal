@@ -1,18 +1,17 @@
 #include "i2c_master_detail.h"
-
-#include <avr/pin_io.h>
+#include <hal/avr/pin_io.h>
 
 #include <avr/io.h>
 #include <util/twi.h>
 
 #if defined __AVR_ATtiny84__ || defined __AVR_ATtiny84A__ || defined __AVR_ATtiny44__    \
-   || defined __AVR_ATtiny44A__ || \ defined __AVR_ATtiny2313__                          \
+   || defined __AVR_ATtiny44A__ || defined __AVR_ATtiny2313__                            \
    || defined __AVR_ATtiny2313A__
 #error "Use USI driver for ATtiny devices"
 #elif defined __AVR_ATmega644__
 #define TW_SCL_PIN C, 0
 #define TW_SDA_PIN C, 1
-#else // ATmega8, 168 et al
+#else  // ATmega8, 168 et al
 #define TW_SCL_PIN C, 5
 #define TW_SDA_PIN C, 4
 #endif

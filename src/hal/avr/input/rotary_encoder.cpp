@@ -1,6 +1,6 @@
 #include <hal/input/rotary_encoder.h>
 
-#include <avr/pin_io.h>
+#include <hal/avr/pin_io.h>
 
 #include <util/atomic.h>
 

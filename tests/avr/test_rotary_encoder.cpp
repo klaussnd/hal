@@ -1,4 +1,4 @@
-#include <avr/timer.h>
+#include <hal/avr/timer.h>
 #include <hal/input/button.h>
 #include <hal/input/rotary_encoder.h>
 #include <hal/usart.h>

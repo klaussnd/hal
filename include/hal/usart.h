@@ -30,7 +30,6 @@ uint8_t usartRead(char* dstbuf, uint8_t maxlength);
 uint8_t usartReadLine(char* dstbuf, uint8_t maxlength);
 
 /** Write data to serial line
- *  Puts data into the write buffer for interrupt-driven sending
  *  @param buf Pointer to the buffer containing the data
  *  @param length Number of characters to be written
  */
@@ -52,6 +51,6 @@ uint8_t usartWriteString(const char* buf);
 /** @see usartWriteString
  *  This version operates on data in program space */
 uint8_t usartWriteString_P(const char* buf);
-#endif
 
-#include "usart_priv.h"
+#include "avr/usart_priv.h"
+#endif

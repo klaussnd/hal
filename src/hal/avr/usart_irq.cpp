@@ -1,7 +1,7 @@
 #include <hal/usart.h>
 
-#include <avr/pin_io.h>
-#include <avr/pin_names.h>
+#include <hal/avr/pin_io.h>
+#include <hal/avr/pin_names.h>
 #include <utils/fifo.h>
 
 #include <avr/interrupt.h>
@@ -17,34 +17,33 @@
 
 namespace
 {
-   void setWriteIrq();
-   void deactivateWriteIrq();
+void setWriteIrq();
+void deactivateWriteIrq();
 
-   // Temporarily deactivate interrupts for receive buffer for atomic access
-   class AtomicBlockReceive
-   {
-   public:
-      AtomicBlockReceive();
-      ~AtomicBlockReceive();
+// Temporarily deactivate interrupts for receive buffer for atomic access
+class AtomicBlockReceive
+{
+public:
+   AtomicBlockReceive();
+   ~AtomicBlockReceive();
 
-   private:
-      uint8_t m_originalState;
-   };
+private:
+   uint8_t m_originalState;
+};
 
-   // send and receive buffers (global state)
-   struct UsartReceiveBuffer
-   {
-      Fifo<char, USART_RX_BUFLEN> fifo;
-      uint8_t newline_count {0};
-   };
+// send and receive buffers (global state)
+struct UsartReceiveBuffer
+{
+   Fifo<char, USART_RX_BUFLEN> fifo;
+   uint8_t newline_count{0};
+};
 
-   struct
-   {
-      volatile UsartReceiveBuffer recv;
-      volatile Fifo<char, USART_TX_BUFLEN> send;
-   } m_usart_data;
-}
-
+struct
+{
+   volatile UsartReceiveBuffer recv;
+   volatile Fifo<char, USART_TX_BUFLEN> send;
+} m_usart_data;
+}  // namespace
 
 void usartInitImpl()
 {
@@ -52,17 +51,17 @@ void usartInitImpl()
    confPinAsInput(PIN_USART_RX);
 
 #if defined UCSR0B
-   UCSR0B |= (1<<TXEN0)|(1<<RXEN0); // enable UART TX / RX
-   UCSR0B |= (1<<RXCIE0); // interrupt on receive
-   UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00); // asynchronous 8N1
+   UCSR0B |= (1 << TXEN0) | (1 << RXEN0);    // enable UART TX / RX
+   UCSR0B |= (1 << RXCIE0);                  // interrupt on receive
+   UCSR0C |= (1 << UCSZ01) | (1 << UCSZ00);  // asynchronous 8N1
 #elif UCSRB
-   UCSRB |= (1<<TXEN) | (1<<RXEN);
-   UCSRB |= (1<<RXCIE);
-   UCSRC = (1<<UCSZ1)|(1<<UCSZ0)
- #ifdef URSEL
-           | (1<<URSEL) // chip-specific to set this register
- #endif
-           ;
+   UCSRB |= (1 << TXEN) | (1 << RXEN);
+   UCSRB |= (1 << RXCIE);
+   UCSRC = (1 << UCSZ1) | (1 << UCSZ0)
+#ifdef URSEL
+           | (1 << URSEL)  // chip-specific to set this register
+#endif
+      ;
 #endif
 }
 
@@ -86,9 +85,7 @@ uint8_t usartReadUntil(char* dstbuf, uint8_t maxlength, const char endchar)
    {
       AtomicBlockReceive lock;
       /* copy data */
-      for (ind = 0;
-           !m_usart_data.recv.fifo.isEmpty() && ind < maxlength;
-           ++ind, ++dstbuf)
+      for (ind = 0; !m_usart_data.recv.fifo.isEmpty() && ind < maxlength; ++ind, ++dstbuf)
       {
          *dstbuf = m_usart_data.recv.fifo.read();
          if (*dstbuf == '\n') /* newline counter */
@@ -195,46 +192,46 @@ ISR(USART_UDRE_vect)
 
 namespace
 {
-   inline void setWriteIrq()
-   {
+inline void setWriteIrq()
+{
 #ifdef UCSR0A
-      UCSR0B |= (1 << UDRIE0);
+   UCSR0B |= (1 << UDRIE0);
 #else
-      UCSRB |= (1 << UDRIE);
+   UCSRB |= (1 << UDRIE);
 #endif
-   }
+}
 
-   inline void deactivateWriteIrq()
-   {
+inline void deactivateWriteIrq()
+{
 #ifdef UCSR0B
-      UCSR0B &= ~(1<<UDRIE0);
+   UCSR0B &= ~(1 << UDRIE0);
 #else
-      UCSRB &= ~(1<<UDRIE);
+   UCSRB &= ~(1 << UDRIE);
 #endif
-   }
+}
 
-   AtomicBlockReceive::AtomicBlockReceive()
+AtomicBlockReceive::AtomicBlockReceive()
       : m_originalState(
 #ifdef UCSR0B
-           UCSR0B & (1<<RXCIE0)
+           UCSR0B & (1 << RXCIE0)
 #else
-           UCSRB & (1<<RXCIE);
+           UCSRB & (1 << RXCIE);
 #endif
-           )
-   {
+        )
+{
 #ifdef UCSR0B
-      UCSR0B &= ~(1<<RXCIE0);
+   UCSR0B &= ~(1 << RXCIE0);
 #else
-      UCSRB &= ~(1<<RXCIE);
+   UCSRB &= ~(1 << RXCIE);
 #endif
-   }
-
-   AtomicBlockReceive::~AtomicBlockReceive()
-   {
-#ifdef UCSR0B
-      UCSR0B |= m_originalState;
-#else
-      UCSRB |= m_originalState;
-#endif
-   }
 }
+
+AtomicBlockReceive::~AtomicBlockReceive()
+{
+#ifdef UCSR0B
+   UCSR0B |= m_originalState;
+#else
+   UCSRB |= m_originalState;
+#endif
+}
+}  // namespace

@@ -1,5 +1,5 @@
-#include <avr/pin_io.h>
-#include <avr/timer.h>
+#include <hal/avr/pin_io.h>
+#include <hal/avr/timer.h>
 #include <hal/input/button.h>
 
 #include <avr/interrupt.h>

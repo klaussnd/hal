@@ -1,6 +1,5 @@
 // private implementation-specific
 
-#ifdef __AVR
 #include <avr/io.h>
 
 void usartInitImpl();
@@ -33,7 +32,6 @@ void usartInit()
 
    usartInitImpl();
 }
-#endif
 
 /*  Read received characters from serial port
  *
@@ -59,7 +57,6 @@ inline uint8_t usartReadLine(char* dstbuf, uint8_t maxlength)
    return usartReadUntil(dstbuf, maxlength, '\n');
 }
 
-#ifdef __AVR
 enum class MemoryLocation
 {
    RAM,
@@ -102,4 +99,3 @@ inline uint8_t usartWriteString_P(const char* buf)
 {
    return usartWriteImpl(buf, 0, MemoryLocation::PROGRAM_SPACE);
 }
-#endif
