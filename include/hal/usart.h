@@ -25,18 +25,27 @@ bool usartInit(const char* device, unsigned long baudrate);
 void usartFinalise();
 #endif
 
-/** Return true if a complete line is available to be read in text mode */
-bool usartAvailReadLine();
+/** Returns the number of bytes available to read. May be 0. */
+uint8_t usartBytesAvailableToRead();
 
-/** Read from serial line (binary mode) */
+/** Return true if a complete line is available to be read in text mode */
+bool usartIsLineAvailableToRead();
+
+/** Read from serial line (binary mode)
+ *  @param maxlength The maximal number of bytes to read
+ *  @return The actual number of bytes read
+ */
 uint8_t usartRead(char* dstbuf, uint8_t maxlength);
 
-/** Read one line from serial line (string mode) */
+/** Read one line from serial line (string mode)
+ *  @return The number of bytes read
+ */
 uint8_t usartReadLine(char* dstbuf, uint8_t maxlength);
 
 /** Write data to serial line
  *  @param buf Pointer to the buffer containing the data
- *  @param length Number of characters to be written
+ *  @param length Number of bytes to be written
+ *  @return Actual number of bytes written
  */
 uint8_t usartWrite(const char* buf, uint8_t length);
 

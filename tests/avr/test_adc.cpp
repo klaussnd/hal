@@ -13,10 +13,10 @@ int main(void)
    usartInit<19200>();
    sei();
 
-   while(1)
+   while (1)
    {
       usartWriteString_P(PSTR("."));
-      if (usartAvailReadLine())
+      if (usartIsLineAvailableToRead())
       {
          char buf[16];
 

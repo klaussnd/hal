@@ -65,7 +65,14 @@ void usartInitImpl()
 #endif
 }
 
-bool usartAvailReadLine()
+uint8_t usartBytesAvailableToRead()
+{
+   const AtomicBlockReceive lock;
+   const uint8_t bytes = m_usart_data.recv.fifo.count();
+   return bytes;
+}
+
+bool usartIsLineAvailableToRead()
 {
    /* atomic read so no need to de-activate interrupts */
    return (m_usart_data.recv.newline_count > 0);
@@ -83,7 +90,7 @@ uint8_t usartReadUntil(char* dstbuf, uint8_t maxlength, const char endchar)
    /* disable USART receive interrupt to avoid the irq handler to
       write the global memory while we are accessing it */
    {
-      AtomicBlockReceive lock;
+      const AtomicBlockReceive lock;
       /* copy data */
       for (ind = 0; !m_usart_data.recv.fifo.isEmpty() && ind < maxlength; ++ind, ++dstbuf)
       {

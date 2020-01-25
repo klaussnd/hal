@@ -1,8 +1,9 @@
 #include <hal/usart.h>
 
-#include <cerrno>     // Error number definitions
-#include <cstring>    // memset()
-#include <fcntl.h>    // open(), O_RDWR, O_NOCTTY etc.
+#include <cerrno>   // Error number definitions
+#include <cstring>  // memset()
+#include <fcntl.h>  // open(), O_RDWR, O_NOCTTY etc.
+#include <sys/ioctl.h>
 #include <termios.h>  // Flags and Baud-settings | <asm/termbits.h>
 #include <unistd.h>   // read(), write()
 
@@ -68,6 +69,13 @@ void usartFinalise()
       close(m_fd);
       m_fd = -1;
    }
+}
+
+uint8_t usartBytesAvailableToRead()
+{
+   int bytes_available = 0;
+   ioctl(m_fd, FIONREAD, &bytes_available);
+   return static_cast<uint8_t>(bytes_available);
 }
 
 uint8_t usartRead(char* dstbuf, uint8_t maxlength)
