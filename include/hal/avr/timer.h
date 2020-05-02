@@ -27,6 +27,7 @@
 #define TMR0_PRE_256  (1<<CS02)
 #define TMR0_PRE_1024 ((1<<CS02) | (1<<CS00))
 #define TMR0_PRE_MASK ((1<<CS02) | (1<<CS01) | (1<<CS00))
+#define TMR0_EXT_CLOCK(edge) ((1<<CS02) | (1<<CS01) | (edge << CS00))
 
 #define TMR1_PRE_0    0
 #define TMR1_PRE_1    (1<<CS10)
@@ -35,6 +36,7 @@
 #define TMR1_PRE_256  (1<<CS12)
 #define TMR1_PRE_1024 ((1<<CS12) | (1<<CS10))
 #define TMR1_PRE_MASK ((1<<CS12) | (1<<CS11) | (1<<CS10))
+#define TMR1_EXT_CLOCK(edge) ((1<<CS12) | (1<<CS11) | (edge << CS10))
 
 #define TMR2_PRE_0    0
 #define TMR2_PRE_1    (1<<CS20)
@@ -45,6 +47,9 @@
 #define TMR2_PRE_256  ((1<<CS22) | (1<<CS21))
 #define TMR2_PRE_1024 ((1<<CS22) | (1<<CS21) | (1<<CS20))
 #define TMR2_PRE_MASK ((1<<CS22) | (1<<CS21) | (1<<CS20))
+
+#define RAISING_EDGE 1
+#define FALLING_EDGE 0
 
 #if AVR_ARCH == 2 || AVR_ARCH == 25
  #define TMR_VECT_BASENAME TIM
@@ -74,6 +79,12 @@
  *  @e pre must be a valid prescaler factor
  */
 #define TMR_SET_PRESCALER(tmr_no, pre) TMR_SET_PRE(tmr_no, pre)
+
+/** Sets timer @e tmr_no to operate on external clock on Tn pin
+ *  (with n = tmr_no) on @e edge
+ *  @param edge RAISING_EDGE or FALLING_EDGE
+ */
+#define TMR_SET_EXT_CLOCK(tmr_no, edge) TMR_SET_EXT_CLOCK_X(tmr_no, edge)
 
 /** Stop timer */
 #define TMR_STOP(tmr_no) TMR_SET_PRESCALER(tmr_no, 0)
@@ -152,6 +163,9 @@
 
 #define TMR_SET_PRE(tmr_no, pre) \
    TCCR ## tmr_no ## B = ((TCCR ## tmr_no ## B) & ~(TMR ## tmr_no ## _PRE_MASK)) | (TMR ## tmr_no ## _PRE_ ## pre)
+
+#define TMR_SET_EXT_CLOCK_X(tmr_no, edge) \
+   TCCR ## tmr_no ## B = ((TCCR ## tmr_no ## B) & ~(TMR ## tmr_no ## _PRE_MASK)) | (TMR ## tmr_no ## _EXT_CLOCK(edge))
 
 #define TMR_SET_NORMAL_X(tmr_no) \
    TCCR ## tmr_no ## A = 0; \
