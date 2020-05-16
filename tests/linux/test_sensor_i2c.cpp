@@ -13,9 +13,10 @@ constexpr int INTERVAL = 5;
 
 int main()
 {
-   if (!i2cMasterInit())
+   const char* device = "/dev/i2c-1";
+   if (!i2cMasterInit(device))
    {
-      std::cerr << "Unable to initialise i2c\n";
+      std::cerr << "Unable to initialise i2c " << device << "\n";
       return EXIT_FAILURE;
    }
    if (!si7021Init())

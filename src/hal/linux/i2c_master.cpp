@@ -8,18 +8,14 @@
 #include <i2c/smbus.h>
 #endif
 
-#ifndef I2C_DEV
-#define I2C_DEV "/dev/i2c-2"
-#endif
-
 namespace
 {
 int m_fd;
 }
 
-bool i2cMasterInit()
+bool i2cMasterInit(const char* device)
 {
-   m_fd = open(I2C_DEV, O_RDWR);
+   m_fd = open(device, O_RDWR);
    return (m_fd >= 0);
 }
 

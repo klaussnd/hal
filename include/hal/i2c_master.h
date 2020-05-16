@@ -26,7 +26,11 @@ enum class I2cStatus
 };
 
 /** Initialise i2c interface */
+#ifdef __AVR
 bool i2cMasterInit();
+#elif defined __linux
+bool i2cMasterInit(const char* device);
+#endif
 
 /** Send data to i2c
  */
