@@ -10,7 +10,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <linux/socketcan.h>
+#include <hal/linux/socketcan.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -34,3 +34,12 @@ target_compile_definitions(test_sensor_i2c
    PRIVATE
       I2C_DEV="/dev/i2c-1"
 )
+
+add_executable(socketcan_read
+   socketcan_read.cpp
+   ${SOURCE_DIR}/hal/linux/socketcan.cpp
+)
+target_include_directories(socketcan_read
+   PRIVATE
+      ${INC_DIR}
+)
