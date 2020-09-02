@@ -12,11 +12,11 @@
 
 #include <hal/linux/socketcan.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
 #include <fcntl.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <linux/can.h>
@@ -29,9 +29,8 @@
 
 namespace
 {
-   int m_can_socket{-1};
+int m_can_socket{-1};
 }
-
 
 bool can_init()
 {
@@ -40,7 +39,8 @@ bool can_init()
    /* Locate the interface you wish to use */
    struct ifreq ifr;
    strcpy(ifr.ifr_name, CAN_INTERFACE_NAME);
-   ioctl(m_can_socket, SIOCGIFINDEX, &ifr); /* ifr.ifr_ifindex gets filled with that device's index */
+   ioctl(m_can_socket, SIOCGIFINDEX,
+         &ifr); /* ifr.ifr_ifindex gets filled with that device's index */
 
    /* Select that CAN interface, and bind the socket to it. */
    struct sockaddr_can addr;
@@ -66,17 +66,18 @@ bool can_close()
 bool can_check_message()
 {
    struct can_frame frame;
-   const int nbytes = recv(m_can_socket, &frame, sizeof(struct can_frame),
-                           MSG_DONTWAIT | MSG_PEEK);
+   const int nbytes =
+      recv(m_can_socket, &frame, sizeof(struct can_frame), MSG_DONTWAIT | MSG_PEEK);
 
-   // recv returns 'Resource temporary not available' which is wired but ignored here.
+   // recv returns 'Resource temporary not available' which is weird but ignored here.
    return (nbytes > 0);
 }
 
-bool can_get_message(CanMessage* message)
+bool can_get_message(CanMessage* message, Blocking isBlocking)
 {
    struct can_frame frame;
-   const int nbytes = recv(m_can_socket, &frame, sizeof(struct can_frame), MSG_DONTWAIT);
+   const auto nbytes = recv(m_can_socket, &frame, sizeof(struct can_frame),
+                            isBlocking == Blocking::NON ? MSG_DONTWAIT : 0);
 
    if (nbytes > 0)
    {

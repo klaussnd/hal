@@ -18,6 +18,12 @@
 
 /* Interface for socketcan (Linux) which is API-compatible with avr-canlib */
 
+enum class Blocking
+{
+   NON,
+   YES
+};
+
 bool can_init();
 bool can_close();
 
@@ -25,9 +31,9 @@ bool can_close();
 bool can_check_message();
 
 /** Receive a CAN message
- *  @return false if no message was available
+ *  @return false if no message was available and non-blocking is chosen
  */
-bool can_get_message(CanMessage* message);
+bool can_get_message(CanMessage* message, Blocking isBlocking = Blocking::NON);
 
 /** Send a CAN message */
 bool can_send_message(const CanMessage* message);
