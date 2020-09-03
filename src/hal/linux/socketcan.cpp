@@ -51,8 +51,6 @@ bool can_init()
       return false;
    };
 
-   fcntl(m_can_socket, F_SETFL, O_NONBLOCK);
-
    return true;
 }
 
