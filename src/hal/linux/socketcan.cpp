@@ -75,7 +75,7 @@ bool can_get_message(CanMessage* message, Blocking isBlocking)
 {
    struct can_frame frame;
    const auto nbytes = recv(m_can_socket, &frame, sizeof(struct can_frame),
-                            isBlocking == Blocking::NON ? MSG_DONTWAIT : 0);
+                            isBlocking == Blocking::NON ? MSG_DONTWAIT : MSG_WAITALL);
 
    if (nbytes > 0)
    {
