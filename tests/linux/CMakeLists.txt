@@ -35,6 +35,17 @@ target_compile_definitions(test_sensor_i2c
       I2C_DEV="/dev/i2c-1"
 )
 
+add_executable(test_sensor_light
+    test_sensor_light.cpp
+    ${SOURCE_DIR}/hal/linux/i2c_master.cpp
+    ${SOURCE_DIR}/hal/sensor/si1145.cpp
+    ${SOURCE_DIR}/hal/linux/i2c_master.cpp
+)
+target_include_directories(test_sensor_light
+   PRIVATE
+      ${INC_DIR}
+)
+
 add_executable(socketcan_read
    socketcan_read.cpp
    ${SOURCE_DIR}/hal/linux/socketcan.cpp
