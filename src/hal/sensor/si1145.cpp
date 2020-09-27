@@ -124,32 +124,11 @@
 #define SI114X_PSLED3_SELECT_PS2_LED1 0x10
 #define SI114X_PSLED3_SELECT_PS2_LED2 0x20
 #define SI114X_PSLED3_SELECT_PS2_LED3 0x40
-// ADC GAIN DIV
-#define SI114X_ADC_GAIN_DIV1 0X00
-#define SI114X_ADC_GAIN_DIV2 0X01
-#define SI114X_ADC_GAIN_DIV4 0X02
-#define SI114X_ADC_GAIN_DIV8 0X03
-#define SI114X_ADC_GAIN_DIV16 0X04
-#define SI114X_ADC_GAIN_DIV32 0X05
 // LED CURRENT
 #define SI114X_LED_CURRENT_5MA 0X01
 #define SI114X_LED_CURRENT_11MA 0X02
 #define SI114X_LED_CURRENT_22MA 0X03
 #define SI114X_LED_CURRENT_45MA 0X04
-// Recovery period the  ADC takes before making a PS measurement
-#define SI114X_ADC_COUNTER_1ADCCLK 0X00
-#define SI114X_ADC_COUNTER_7ADCCLK 0X01
-#define SI114X_ADC_COUNTER_15ADCCLK 0X02
-#define SI114X_ADC_COUNTER_31ADCCLK 0X03
-#define SI114X_ADC_COUNTER_63ADCCLK 0X04
-#define SI114X_ADC_COUNTER_127ADCCLK 0X05
-#define SI114X_ADC_COUNTER_255ADCCLK 0X06
-#define SI114X_ADC_COUNTER_511ADCCLK 0X07
-// ADC MISC
-#define SI114X_ADC_MISC_LOWRANGE 0X00
-#define SI114X_ADC_MISC_HIGHRANGE 0X20
-#define SI114X_ADC_MISC_ADC_NORMALPROXIMITY 0X00
-#define SI114X_ADC_MISC_ADC_RAWADC 0X04
 // INT OE
 #define SI114X_INT_CFG_INTOE 0X01
 // IRQ ENABLE
@@ -162,12 +141,22 @@
 
 namespace
 {
-uint8_t readByte(uint8_t reg);
-uint16_t readWord(uint8_t reg);
-bool writeByte(uint8_t reg, uint8_t value);
-uint8_t writeParamData(uint8_t reg, uint8_t value);
-
 void reset();
+
+std::optional<uint8_t> readByte(uint8_t reg);
+std::optional<uint16_t> readWord(uint8_t reg);
+bool writeByte(uint8_t reg, uint8_t value);
+// read/write data from configuration RAM
+std::optional<uint8_t> readParamData(uint8_t reg);
+bool writeCommand(uint8_t cmd);
+bool writeParamData(uint8_t reg, uint8_t value);
+
+bool waitForMeasurementCompleted();
+void clearInterrupt();
+
+uint8_t getGainValue(Si1145Gain gain);
+uint8_t getRangeValue(Si1145Range range);
+uint8_t getPhotodiodeValue(Si1145IrPhotodiode photodiode);
 }  // namespace
 
 bool si1145Init()
@@ -179,47 +168,94 @@ bool si1145Init()
 
    reset();
 
-   // ENABLE UV reading
+   // enable UV reading
    // these reg must be set to the fixed value
    writeByte(SI114X_UCOEFF0, 0x29);
    writeByte(SI114X_UCOEFF1, 0x89);
    writeByte(SI114X_UCOEFF2, 0x02);
    writeByte(SI114X_UCOEFF3, 0x00);
-   writeParamData(SI114X_CHLIST, SI114X_CHLIST_ENUV | SI114X_CHLIST_ENALSIR
-                                    | SI114X_CHLIST_ENALSVIS | SI114X_CHLIST_ENPS1);
+   // set which inputs are enabled
+   writeParamData(SI114X_CHLIST,
+                  SI114X_CHLIST_ENUV | SI114X_CHLIST_ENALSIR | SI114X_CHLIST_ENALSVIS);
 
-   // PS ADC SETTING
-   writeParamData(SI114X_PS_ADC_GAIN, SI114X_ADC_GAIN_DIV1);
-   writeParamData(SI114X_PS_ADC_COUNTER, SI114X_ADC_COUNTER_511ADCCLK);
-   writeParamData(SI114X_PS_ADC_MISC,
-                  SI114X_ADC_MISC_HIGHRANGE | SI114X_ADC_MISC_ADC_RAWADC);
+   // Disable all LEDs
+   writeParamData(SI114X_PSLED12_SELECT, 0);
+   writeParamData(SI114X_PSLED3_SELECT, 0);
 
-   // VIS ADC SETTING
-   writeParamData(SI114X_ALS_VIS_ADC_GAIN, SI114X_ADC_GAIN_DIV1);
-   writeParamData(SI114X_ALS_VIS_ADC_COUNTER, SI114X_ADC_COUNTER_511ADCCLK);
-   writeParamData(SI114X_ALS_VIS_ADC_MISC, SI114X_ADC_MISC_HIGHRANGE);
-
-   // IR ADC SETTING
-   writeParamData(SI114X_ALS_IR_ADC_GAIN, SI114X_ADC_GAIN_DIV1);
-   writeParamData(SI114X_ALS_IR_ADC_COUNTER, SI114X_ADC_COUNTER_511ADCCLK);
-   writeParamData(SI114X_ALS_IR_ADC_MISC, SI114X_ADC_MISC_HIGHRANGE);
+   si1145SetVisMode(Si1145Range::HIGH, Si1145Gain::DIV_1);
+   si1145SetIrMode(Si1145Range::HIGH, Si1145Gain::DIV_1, Si1145IrPhotodiode::SMALL);
 
    // interrupt enable
-   writeByte(SI114X_INT_CFG, SI114X_INT_CFG_INTOE);
+   writeByte(SI114X_INT_CFG, SI114X_INT_CFG_INTOE);  // enable interrupt pin
    writeByte(SI114X_IRQ_ENABLE, SI114X_IRQEN_ALS);
 
-   // AUTO RUN
-   writeByte(SI114X_MEAS_RATE0, 0xFF);
-   writeByte(SI114X_COMMAND, SI114X_PSALS_AUTO);
    return true;
 }
 
-std::optional<Si1145Data> si1145Measure()
+bool si1145StartMeasurement()
 {
-   const uint16_t vis = readWord(SI114X_ALS_VIS_DATA0);
-   const uint16_t ir = readWord(SI114X_ALS_IR_DATA0);
-   const uint16_t uv = readWord(SI114X_AUX_DATA0_UVINDEX0);
-   return Si1145Data{vis, ir, uv};
+   return writeCommand(SI114X_ALS_FORCE);
+}
+
+std::optional<bool> si1145IsMeasurementFinished()
+{
+   const auto status = readByte(SI114X_IRQ_STATUS);
+   if (status.has_value())
+   {
+      return status.value() & (1 << 0);
+   }
+   return {};
+}
+
+std::optional<Si1145Data> si1145ReadMeasurement()
+{
+   if (!waitForMeasurementCompleted())
+   {
+      return {};
+   }
+
+   clearInterrupt();
+
+   const auto vis = readWord(SI114X_ALS_VIS_DATA0);
+   const auto ir = readWord(SI114X_ALS_IR_DATA0);
+   const auto uv = readWord(SI114X_AUX_DATA0_UVINDEX0);
+   if (vis.has_value() && ir.has_value() && uv.has_value())
+   {
+      return Si1145Data{vis.value(), ir.value(), uv.value()};
+   }
+   else
+   {
+      return {};
+   }
+}
+
+bool si1145SetVisMode(Si1145Range range, Si1145Gain gain)
+{
+   const uint8_t gain_value = getGainValue(gain);
+   const uint8_t complement = 0x07 ^ gain_value;
+   return writeParamData(SI114X_ALS_VIS_ADC_GAIN, gain_value)
+          && writeParamData(SI114X_ALS_VIS_ADC_COUNTER,
+                            static_cast<uint8_t>(complement << 4))
+          && writeParamData(SI114X_ALS_VIS_ADC_MISC, getRangeValue(range));
+}
+
+bool si1145SetIrMode(Si1145Range range, Si1145Gain gain, Si1145IrPhotodiode photodiode)
+{
+   const uint8_t gain_value = getGainValue(gain);
+   const uint8_t complement = 0x07 ^ gain_value;
+   bool isOk =
+      writeParamData(SI114X_ALS_IR_ADC_GAIN, gain_value)
+      && writeParamData(SI114X_ALS_IR_ADC_COUNTER, static_cast<uint8_t>(complement << 4))
+      && writeParamData(SI114X_ALS_IR_ADC_MUX, getPhotodiodeValue(photodiode));
+   const auto old_misc_value = readParamData(SI114X_ALS_IR_ADC_MISC);
+   isOk &= old_misc_value.has_value();
+   if (old_misc_value.has_value())
+   {
+      const uint8_t new_misc_value =
+         (old_misc_value.value() & ~(1 << 5)) | getRangeValue(range);
+      isOk &= writeParamData(SI114X_ALS_IR_ADC_MISC, new_misc_value);
+   }
+   return isOk;
 }
 
 namespace
@@ -240,24 +276,24 @@ void reset()
    delay_ms(10);
 }
 
-uint8_t readByte(uint8_t reg)
+std::optional<uint8_t> readByte(uint8_t reg)
 {
    uint8_t value;
    if (i2cMasterWriteThenRead(SI114X_ADDR, &reg, 1, &value, 1) == I2cStatus::SUCCESS)
    {
       return value;
    }
-   return 0xff;
+   return {};
 }
 
-uint16_t readWord(uint8_t reg)
+std::optional<uint16_t> readWord(uint8_t reg)
 {
    uint8_t buf[2];
    if (i2cMasterWriteThenRead(SI114X_ADDR, &reg, 1, buf, 2) == I2cStatus::SUCCESS)
    {
       return buf[0] | (static_cast<uint16_t>(buf[1]) << 8);
    }
-   return 0xffff;
+   return {};
 }
 
 bool writeByte(uint8_t reg, uint8_t value)
@@ -266,12 +302,126 @@ bool writeByte(uint8_t reg, uint8_t value)
    return i2cMasterWrite(SI114X_ADDR, buf, sizeof(buf)) == I2cStatus::SUCCESS;
 }
 
-uint8_t writeParamData(uint8_t reg, uint8_t value)
+bool writeCommand(uint8_t cmd)
 {
-   // write Value into PARAMWR reg first
-   writeByte(SI114X_WR, value);
-   writeByte(SI114X_COMMAND, reg | SI114X_SET);
-   // SI114X writes value out to PARAM_RD,read and confirm its right
-   return readByte(SI114X_RD);
+   if (!writeByte(SI114X_COMMAND, SI114X_NOP))  // clear response register
+   {
+      return false;
+   }
+   auto response = readByte(SI114X_RESPONSE);
+   const bool is_ok = response.has_value()
+                      && response.value() == 0x00  // verify response register cleared
+                      && writeByte(SI114X_COMMAND, cmd);  // write to command register
+   if (!is_ok)
+   {
+      return false;
+   }
+
+   for (uint8_t i = 0; i < 250; ++i)
+   {
+      response = readByte(SI114X_RESPONSE);
+      if (!response.has_value())
+      {
+         return false;
+      }
+      if (response.value() > 0)
+      {
+         const uint8_t error_code = response.value() & 0xf0;
+         return error_code == 0;
+      }
+      delay_us(100);
+   }
+   // abort if response remains 0 for more than 25ms
+   return false;
+}
+
+std::optional<uint8_t> readParamData(uint8_t reg)
+{
+   if (writeCommand(SI114X_QUERY | reg))  // query command
+   {
+      // value is written to PARAM_RD
+      return readByte(SI114X_RD);
+   }
+   return {};
+}
+
+bool writeParamData(uint8_t reg, uint8_t value)
+{
+   const bool is_ok = writeByte(SI114X_WR, value)  // write Value into PARAMWR reg first
+                      && writeCommand(SI114X_SET | reg);  // then use set command
+   if (is_ok)
+   {
+      // value is written to PARAM_RD, read and confirm it is correct
+      const auto set_value = readByte(SI114X_RD);
+      return set_value && set_value.value() == value;
+   }
+   return false;
+}
+
+bool waitForMeasurementCompleted()
+{
+   std::optional<bool> is_finished;
+   do
+   {
+      is_finished = si1145IsMeasurementFinished();
+   } while (is_finished.has_value() && !is_finished.value());
+   return is_finished.has_value();
+}
+
+void clearInterrupt()
+{
+   const auto irq_status = readByte(SI114X_IRQ_STATUS);
+   if (irq_status)
+   {
+      writeByte(SI114X_IRQ_STATUS, irq_status.value());
+   }
+}
+
+uint8_t getGainValue(Si1145Gain gain)
+{
+   switch (gain)
+   {
+   case Si1145Gain::DIV_1:
+      return 0x00;
+   case Si1145Gain::DIV_2:
+      return 0x01;
+   case Si1145Gain::DIV_4:
+      return 0x02;
+   case Si1145Gain::DIV_8:
+      return 0x03;
+   case Si1145Gain::DIV_16:
+      return 0x04;
+   case Si1145Gain::DIV_32:
+      return 0x05;
+   case Si1145Gain::DIV_64:
+      return 0x06;
+   case Si1145Gain::DIV_128:
+      return 0x07;
+   }
+   return 0;  // should not happen
+}
+
+uint8_t getRangeValue(Si1145Range range)
+{
+   switch (range)
+   {
+   case Si1145Range::NORMAL:
+      return 0;
+   case Si1145Range::HIGH:
+      return (1 << 5);
+   }
+   return 0;  // should not happen
+}
+
+uint8_t getPhotodiodeValue(Si1145IrPhotodiode photodiode)
+{
+   switch (photodiode)
+   {
+   case Si1145IrPhotodiode::SMALL:
+      return 0x00;
+   case Si1145IrPhotodiode::LARGE:
+      return 0x03;
+   }
+   return 0;  // should not happen
 }
 }  // namespace

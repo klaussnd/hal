@@ -26,10 +26,11 @@ int main()
 
    while (1)
    {
-      const auto data = si1145Measure();
+      si1145StartMeasurement();
+      const auto data = si1145ReadMeasurement();
       if (data)
       {
-         std::cout << std::time(nullptr) << " UV index" << data->uv_index << " VIS "
+         std::cout << std::time(nullptr) << " UV index " << data->uv_index << " VIS "
                    << data->vis << " IR " << data->ir << std::endl;
       }
       else
