@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../src)
 set(INC_DIR ${CMAKE_SOURCE_DIR}/../../include)
 
+find_package(Boost COMPONENTS program_options REQUIRED)
+
 add_executable(test_usart
     test_usart.cpp
     ${SOURCE_DIR}/hal/linux/usart.cpp
@@ -39,6 +41,10 @@ add_executable(test_sensor_light
 target_include_directories(test_sensor_light
    PRIVATE
       ${INC_DIR}
+)
+target_link_libraries(test_sensor_light
+   PRIVATE
+      Boost::program_options
 )
 
 add_executable(socketcan_read
