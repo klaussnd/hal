@@ -1,6 +1,7 @@
 #include <hal/i2c_master.h>
 
 #include <fcntl.h>
+// Note: the libi2c-dev package must be installed for this to work
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
