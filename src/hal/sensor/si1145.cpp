@@ -137,6 +137,16 @@
 #define SI114X_IRQEN_PS2 0x08
 #define SI114X_IRQEN_PS3 0x10
 
+// Error status returned in the response register
+#define SI114X_ERROR_INVALID_SETTING 0x80
+#define SI114X_ERROR_PS1_ADC_OVERFLOW 0x88
+#define SI114X_ERROR_PS2_ADC_OVERFLOW 0x89
+#define SI114X_ERROR_PS3_ADC_OVERFLOW 0x8a
+#define SI114X_ERROR_ALS_VIS_ADC_OVERFLOW 0x8c
+#define SI114X_ERROR_ALS_IR_ADC_OVERFLOW 0x8d
+#define SI114X_ERROR_AUX_ADC_OVERFLOW 0x8e
+
+// i2c address
 #define SI114X_ADDR 0X60
 
 namespace
@@ -326,8 +336,11 @@ bool writeCommand(uint8_t cmd)
       }
       if (response.value() > 0)
       {
-         const uint8_t error_code = response.value() & 0xf0;
-         return error_code == 0;
+         const bool is_error = (response.value() & 0xf0) != 0;
+         const bool is_overflow = is_error && (response.value() & 0x0f) >= 0x08;
+         // don't regard overflow as an error
+         // it can easily be detected by checking if the value is 0xffff
+         return !is_error || is_overflow;
       }
       delay_us(100);
    }
