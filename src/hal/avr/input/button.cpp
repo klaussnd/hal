@@ -87,9 +87,14 @@ namespace
 {
 volatile uint8_t button_state;  // debounced and inverted button state:
                                 // bit = 1: button pressed
+#ifndef BUTTON_HAVE_NO_PRESS
 volatile uint8_t button_press;  // button press detect
 volatile uint8_t button_rpt;    // button long press and repeat
 volatile uint8_t rpt_count;     // repeat counter
+#endif
+#ifdef BUTTON_HAVE_TOGGLE
+volatile uint8_t button_toggle;  // button toggle detect
+#endif
 }  // namespace
 
 void buttonInit(void)
@@ -98,6 +103,7 @@ void buttonInit(void)
    PORT(BUTTON_PORT) |= BUTTON_MASK;  // and turn on pull up resistors
 }
 
+#ifndef BUTTON_HAVE_NO_PRESS
 uint8_t buttonPress(uint8_t button_mask)
 {
    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)  // read and clear atomic!
@@ -146,17 +152,34 @@ uint8_t buttonDown(uint8_t button_mask)
 {
    return (button_state & button_mask);
 }
+#endif
+
+#ifdef BUTTON_HAVE_TOGGLE
+uint8_t buttonToggle(uint8_t button_mask)
+{
+   ATOMIC_BLOCK(ATOMIC_RESTORESTATE)  // read and clear atomic!
+   {
+      button_mask &= button_toggle;  // read button(s)
+      button_toggle ^= button_mask;  // clear button(s)
+   }
+   return button_mask;
+}
+#endif
 
 void buttonSample(void)
 {
    static uint8_t ct0, ct1;
 
-   uint8_t i = PIN(BUTTON_PORT);        // sample buttons, 0 = down
-   i = button_state ^ ~i;               // button changed ?
-   ct0 = ~(ct0 & i);                    // reset or count ct0
-   ct1 = ct0 ^ (ct1 & i);               // reset or count ct1
-   i &= ct0 & ct1;                      // count until roll over ?
-   button_state ^= i;                   // then toggle debounced state
+   uint8_t i = PIN(BUTTON_PORT);  // sample buttons, 0 = down
+   i = button_state ^ ~i;         // button changed ?
+   ct0 = ~(ct0 & i);              // reset or count ct0
+   ct1 = ct0 ^ (ct1 & i);         // reset or count ct1
+   i &= ct0 & ct1;                // count until roll over ?
+   button_state ^= i;             // then toggle debounced state
+#ifdef BUTTON_HAVE_TOGGLE
+   button_toggle |= i;
+#endif
+#ifndef BUTTON_HAVE_NO_PRESS
    button_press |= (button_state & i);  // 0->1: button press detect
 
    if (rpt_count == 0)
@@ -174,4 +197,5 @@ void buttonSample(void)
          button_rpt |= (button_state & REPEAT_MASK);
       }
    }
+#endif
 }

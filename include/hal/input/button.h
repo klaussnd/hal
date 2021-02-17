@@ -1,5 +1,8 @@
 /*  Debounced detection of max. 8 buttons, sampling 4 times, with repeat function
  *
+ *  Define BUTTON_HAVE_TOGGLE to compile button toggle detection.
+ *  Define BUTTON_HAVE_NO_PRESS to not compile the code for button press detection.
+ *
  *  Original author: Peter Dannegger <danni@specs.de>
  *  Adjusted by Klaus Schneider-Zapp klaus underscore snd at web dot de
  *
@@ -36,13 +39,14 @@ uint8_t buttonLong(uint8_t button_mask);
  */
 uint8_t buttonRpt(uint8_t button_mask);
 
-/** Check if a button has been pressed. Each pressed button is reported
- *  only once.
- */
+/// Check if a button has been pressed. Each pressed button is reported only once.
 uint8_t buttonPress(uint8_t button_mask);
 
 /// Return button state
 uint8_t buttonDown(uint8_t button_mask);
+
+/// Return if a button was toggled. Each toggle is reported only once.
+uint8_t buttonToggle(uint8_t button_mask);
 
 /// Sampling function, must be called every 10ms
 void buttonSample(void);

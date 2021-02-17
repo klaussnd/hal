@@ -61,6 +61,25 @@ avr_target_compile_definitions(test_rotary_encoder
         BUTTON_MASK=0x40
 )
 
+add_avr_executable(test_button_toggle
+   test_button_toggle.cpp
+   ${SOURCE_DIR}/hal/avr/input/button.cpp
+   ${SOURCE_DIR}/hal/avr/usart_irq.cpp
+   ${SOURCE_DIR}/hal/avr/usart_stdout.c
+)
+avr_target_include_directories(test_button_toggle
+    PRIVATE
+        ${INC_DIR}
+        ${STDCPP_INC_DIR}
+)
+avr_target_compile_definitions(test_button_toggle
+    PRIVATE
+        BUTTON_PORT=D
+        BUTTON_MASK=0x40
+        BUTTON_HAVE_TOGGLE=1
+        BUTTON_HAVE_NO_PRESS
+)
+
 add_avr_executable(test_i2c_si7021
    test_i2c_si7021.cpp
    ${SOURCE_DIR}/hal/avr/i2c_master_general.cpp
