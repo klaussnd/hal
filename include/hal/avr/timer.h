@@ -151,7 +151,7 @@
 #define TMR_OVF_ISR_XX(tmr_basename, tmr_no) ISR(tmr_basename ## tmr_no ## _OVF_vect)
 
 #define TMR_MSEC2TIMER_X(ms, pre) TMR_MSEC2TIMER_XX(ms ## UL, pre ## UL)
-#define TMR_MSEC2TIMER_XX(ms, pre) (ms * (F_CPU / pre) / 1000L)
+#define TMR_MSEC2TIMER_XX(ms, pre) (ms * (F_CPU / pre) / 1000UL)
 
 #if defined __AVR_ATmega88__ || defined __AVR_ATmega128__ || \
     defined __AVR_ATmega168__ || defined __AVR_ATmega168P__ || \
