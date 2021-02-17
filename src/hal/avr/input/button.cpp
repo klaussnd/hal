@@ -1,3 +1,67 @@
+/*
+From https://www.mikrocontroller.net/articles/Entprellung
+
+Funktionsweise
+
+Der Code basiert auf 8 parallelen vertikalen Zählern, die über die Variablen ct0 und ct1
+aufgebaut werden, wobei jeweils ein Bit in ct0 mit dem gleichwertigen Bit in ct1
+zusammengenommen einen 2-Bit-Zähler bildet. Der Code der sich um die 8 Zähler kümmert,
+ist so geschrieben, daß er alle 8 Zähler gemeinsam parallel behandelt.
+
+  i = button_state ^ ~BUTTON_PIN;                // key changed ?
+
+i enthält an dieser Stelle für jede Taste, die sich im Vergleich mit dem vorhergehenden
+entprellten Zustand (keystate) verändert hat, ein 1 Bit.
+
+  ct0 = ~( ct0 & i );                             // reset or count ct0
+  ct1 = ct0 ^ (ct1 & i);                          // reset or count ct1
+
+Diese beiden Anweisungen erniedrigen den 2-Bit Zähler ct0/ct1 für jedes Bit um 1,
+welches in i gesetzt ist. Liegt an der entsprechenden Stelle in i ein 0 Bit vor
+(keine Änderung des Zustands), so wird der Zähler ct0/ct1 für dieses Bit auf 1 gesetzt.
+Der Grundzustand des Zählers ist als ct0 == 1 und ct1 == 1 (Wert 3). Der Zähler zählt
+daher mit jedem ISR Aufruf, bei dem die Taste im Vergleich zu keystate als verändert
+erkannt wurde.
+
+  ct1   ct0
+    1    1   // 3
+    1    0   // 2
+    0    1   // 1
+    0    0   // 0
+    1    1   // 3
+
+  i &= ct0 & ct1;                                 // count until roll over ?
+
+In i bleibt nur dort ein 1-Bit erhalten, wo sowohl in ct1 als auch in ct0 ein 1 Bit
+vorgefunden wird, der betreffende Zähler also bis 3 zählen konnte. Durch die zusätzliche
+Verundung mit i wird der Fall abgefangen, dass ein konstanter Zählerwert von 3 in i
+ein 1 Bit hinterlässt. Im Endergebnis bedeutet dass, dass nur ein Zählerwechsel
+von 0 auf 3 zu einem 1 Bit an der betreffenden Stelle in i führt, aber auch nur dann,
+wenn in i an dieser Bitposition ebenfalls ein 1 Bit war (welches wiederrum deswegen
+auf 1 war, weil an diesem Eingabeport eine Veränderung zum letzten bekannten entprellten
+Zustand festgestellt wurde). Alles zusammengenommen heißt das, dass ein Tastendruck dann
+erkannt wird, wenn die Taste 4 mal hintereinander in einem anderen Zustand vorgefunden
+wurde als dem zuletzt bekannten entprellten Tastenzustand.
+
+An dieser Stelle ist i daher ein Vektor von 8 Bits, von denen jedes einzelne der Bits
+darüber Auskunft gibt, ob die entsprechende Taste mehrmals hintereinander im selben
+Zustand angetroffen wurde, der nicht mit dem zuletzt bekannten Tastenzustand
+übereinstimmt. Ist das der Fall, dann wird eine entsprechende Veränderung des
+Tastenzustands in key_state registriert
+
+  button_state ^= i;                             // then toggle debounced state
+
+und wenn sich in key_state das entsprechende Bit von 0 auf 1 verändert hat, wird dieses
+Ereignis als 'Taste wurde niedergedrückt' gewertet.
+
+  button_press |= button_state & i;              // 0->1: key press detect
+
+Damit ist der Tasteneingang entprellt. Und zwar sowohl beim Drücken einer Taste
+als auch beim Loslassen (damit Tastenpreller beim Loslassen nicht mit dem Niederdrücken
+einer Taste verwechselt werden). Der weitere Code beschäftigt sich dann nur noch damit,
+diesen entprellten Tastenzustand weiter zu verarbeiten.
+ */
+
 #include <hal/avr/pin_io.h>
 #include <hal/avr/timer.h>
 #include <hal/input/button.h>
