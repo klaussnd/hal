@@ -24,8 +24,7 @@ int main(void)
       const auto values = si1145ReadMeasurement();
       if (values)
       {
-         fprintf_P(usart_stdout, PSTR("VIS %d, IR %d, UV index %d/100\n"), values->vis,
-                   values->ir, values->uv_index);
+         fprintf_P(usart_stdout, PSTR("VIS %d, IR %d\n"), values->vis, values->ir);
       }
       else
       {

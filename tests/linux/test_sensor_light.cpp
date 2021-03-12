@@ -72,8 +72,8 @@ void standardMeasurement(int interval)
       const auto data = si1145ReadMeasurement();
       if (data)
       {
-         std::cout << std::time(nullptr) << " UV index " << data->uv_index << " VIS "
-                   << data->vis << " IR " << data->ir << std::endl;
+         std::cout << std::time(nullptr) << " VIS " << data->vis << " IR " << data->ir
+                   << std::endl;
       }
       else
       {

@@ -23,7 +23,6 @@ struct Si1145Data
 {
    uint16_t vis;
    uint16_t ir;
-   uint16_t uv_index;
 };
 
 enum class Si1145Gain

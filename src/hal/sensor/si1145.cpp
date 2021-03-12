@@ -178,12 +178,6 @@ bool si1145Init()
 
    reset();
 
-   // enable UV reading
-   // these reg must be set to the fixed value
-   writeByte(SI114X_UCOEFF0, 0x29);
-   writeByte(SI114X_UCOEFF1, 0x89);
-   writeByte(SI114X_UCOEFF2, 0x02);
-   writeByte(SI114X_UCOEFF3, 0x00);
    // set which inputs are enabled
    writeParamData(SI114X_CHLIST,
                   SI114X_CHLIST_ENUV | SI114X_CHLIST_ENALSIR | SI114X_CHLIST_ENALSVIS);
@@ -228,10 +222,9 @@ std::optional<Si1145Data> si1145ReadMeasurement()
 
    const auto vis = readWord(SI114X_ALS_VIS_DATA0);
    const auto ir = readWord(SI114X_ALS_IR_DATA0);
-   const auto uv = readWord(SI114X_AUX_DATA0_UVINDEX0);
-   if (vis.has_value() && ir.has_value() && uv.has_value())
+   if (vis.has_value() && ir.has_value())
    {
-      return Si1145Data{vis.value(), ir.value(), uv.value()};
+      return Si1145Data{vis.value(), ir.value()};
    }
    else
    {
