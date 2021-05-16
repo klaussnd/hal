@@ -199,61 +199,18 @@ Param parseArguments(const int argc, const char* const argv[])
 
 std::ostream& operator<<(std::ostream& os, const Si1145Gain gain)
 {
-   switch (gain)
-   {
-   case Si1145Gain::DIV_1:
-      os << 1;
-      break;
-   case Si1145Gain::DIV_2:
-      os << 2;
-      break;
-   case Si1145Gain::DIV_4:
-      os << 4;
-      break;
-   case Si1145Gain::DIV_8:
-      os << 8;
-      break;
-   case Si1145Gain::DIV_16:
-      os << 16;
-      break;
-   case Si1145Gain::DIV_32:
-      os << 32;
-      break;
-   case Si1145Gain::DIV_64:
-      os << 64;
-      break;
-   case Si1145Gain::DIV_128:
-      os << 128;
-      break;
-   }
+   os << logicalValue(gain);
    return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const Si1145Range range)
 {
-   switch (range)
-   {
-   case Si1145Range::NORMAL:
-      os << "normal";
-      break;
-   case Si1145Range::HIGH:
-      os << "high";
-      break;
-   }
+   os << asString(range);
    return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const Si1145IrPhotodiode ir_photodiode)
 {
-   switch (ir_photodiode)
-   {
-   case Si1145IrPhotodiode::SMALL:
-      os << "small";
-      break;
-   case Si1145IrPhotodiode::LARGE:
-      os << "large";
-      break;
-   }
-
+   os << asString(ir_photodiode);
    return os;
 }

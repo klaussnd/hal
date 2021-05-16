@@ -63,3 +63,13 @@ std::optional<bool> si1145IsMeasurementFinished();
 std::optional<Si1145Data> si1145ReadMeasurement();
 bool si1145SetVisMode(Si1145Range range, Si1145Gain gain);
 bool si1145SetIrMode(Si1145Range range, Si1145Gain gain, Si1145IrPhotodiode photodiode);
+
+// Utility functions (implemented in si1145_helper.cpp)
+/// Return the logical value, i.e. the gain as a number
+uint8_t logicalValue(Si1145Gain gain);
+/// Return a string describing the range value
+/// On AVR the string is stored in program memory (flash).
+const char* asString(Si1145Range range);
+/// Return a string describing the IR photodiode value
+/// On AVR the string is stored in program memory (flash).
+const char* asString(Si1145IrPhotodiode ir_photodiode);
