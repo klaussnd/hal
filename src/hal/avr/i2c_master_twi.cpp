@@ -16,16 +16,18 @@
 #define TW_SDA_PIN C, 4
 #endif
 
+#ifndef I2C_BITRATE
 #define I2C_BITRATE 76000UL
+#endif
 
 bool i2cMasterInit()
 {
    confPinAsInput(TW_SDA_PIN);
    confPinAsInput(TW_SCL_PIN);
 
-   TWSR &= (1 << TWPS0) || (1 << TWPS1);  // no prescaler
+   TWSR &= ((1 << TWPS0) | (1 << TWPS1));  // no prescaler
    // Register setting for bus speed; prescaler is always 1.
-   constexpr uint8_t twbr = ((F_CPU / I2C_BITRATE) - 16UL) / 2UL;
+   constexpr uint8_t twbr = static_cast<uint8_t>(((F_CPU / I2C_BITRATE) - 16UL) / 2UL);
    static_assert(F_CPU / I2C_BITRATE > 16 && twbr >= 11, "I2C speed too fast");
    TWBR = twbr;
 
@@ -69,7 +71,7 @@ bool i2cWriteByte(uint8_t data, I2cWriteType type)
 bool i2cReadByte(uint8_t* data, I2cAck ack)
 {
    // Setup TWI
-   TWCR = (1 << TWEN) | (1 << TWINT) | (ack == I2cAck::ACK) ? (1 << TWEA) : 0;
+   TWCR = (1 << TWEN) | (1 << TWINT) | ((ack == I2cAck::ACK) ? (1 << TWEA) : 0);
    // Wait for TWI to complete.
    while (!(TWCR & (1 << TWINT)))
       ;
