@@ -110,3 +110,18 @@ avr_target_include_directories(test_i2c_si1145
         ${INC_DIR}
         ${STDCPP_INC_DIR}
 )
+
+add_avr_executable(test_i2c_hyt939
+   test_i2c_hyt939.cpp
+   ${SOURCE_DIR}/hal/avr/i2c_master_general.cpp
+   ${SOURCE_DIR}/hal/avr/i2c_master_twi.cpp
+   ${SOURCE_DIR}/hal/avr/i2c_master_detail.h
+   ${SOURCE_DIR}/hal/avr/usart_irq.cpp
+   ${SOURCE_DIR}/hal/avr/usart_stdout.c
+   ${SOURCE_DIR}/hal/sensor/hyt939.cpp
+)
+avr_target_include_directories(test_i2c_hyt939
+    PRIVATE
+        ${INC_DIR}
+        ${STDCPP_INC_DIR}
+)
