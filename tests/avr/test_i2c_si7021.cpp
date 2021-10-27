@@ -13,10 +13,10 @@ int main(void)
    sei();
 
    i2cMasterInit();
-   if (!si7021Init())
+   while (!si7021Init())
    {
       usartWriteString_P(PSTR("Init error\n"));
-      return 0;
+      _delay_ms(5000);
    }
 
    while (1)
@@ -24,6 +24,8 @@ int main(void)
       const uint16_t temp = si7021Temperature();
       const uint8_t humidity = si7021Humidity();
       fprintf_P(usart_stdout, PSTR("T %d rH %d\n"), temp, humidity);
+      _delay_ms(500);
    }
+
    return 0;
 }
