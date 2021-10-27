@@ -51,15 +51,16 @@ I2cStatus i2cMasterWriteThenRead(uint8_t dev_addr, const uint8_t* write_data,
 I2cStatus i2cMasterWrite(uint8_t dev_addr, const uint8_t* data, uint8_t length,
                          bool stop_after_transmission)
 {
-   auto res = i2cStart(dev_addr, I2cOperation::WRITE);
+   const auto res = i2cStart(dev_addr, I2cOperation::WRITE);
    if (res != I2cStatus::SUCCESS)
    {
       return res;
    }
 
-   while (length)
+   bool ok = true;
+   while (ok && length > 0)
    {
-      i2cWriteByte(*data, I2cWriteType::DATA);
+      ok = i2cWriteByte(*data, I2cWriteType::DATA);
       data++;
       length--;
    }
@@ -70,5 +71,5 @@ I2cStatus i2cMasterWrite(uint8_t dev_addr, const uint8_t* data, uint8_t length,
       i2cStop();
    }
 
-   return res;
+   return ok ? I2cStatus::SUCCESS : I2cStatus::TRANSMISSION_ERROR;
 }
