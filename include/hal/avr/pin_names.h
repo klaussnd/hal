@@ -67,4 +67,14 @@
 #define PIN_USART_RX D,0
 #define PIN_USART_TX D,1
 
+/* SPI */
+#if defined __AVR_ATmega168__ || defined __AVR_ATmega168P__ || \
+    defined __AVR_ATmega168A__ || \
+    defined __AVR_ATmega328P__
+#define PIN_SPI_MOSI B,3
+#define PIN_SPI_MISO B,4
+#define PIN_SPI_SCK B,5
+#define PIN_SPI_SS B, 2
+#endif
+
 #endif /* PIN_NAMES_H */
