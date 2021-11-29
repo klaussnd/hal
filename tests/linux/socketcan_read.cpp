@@ -2,11 +2,12 @@
 
 #include <hal/linux/socketcan.h>
 
-int main(void)
+int main(int argc, char** argv)
 {
-   if (!can_init())
+   const char* can_interface = argc > 1 ? argv[1] : "can0";
+   if (!can_init(can_interface))
    {
-      std::cerr << "Unable to open CAN interface\n";
+      std::cerr << "Unable to open CAN interface " << can_interface << "\n";
       return EXIT_FAILURE;
    }
    std::cout << "CAN interface opened successfully\n";

@@ -23,22 +23,18 @@
 #include <linux/can/raw.h>
 #include <string.h>
 
-#ifndef CAN_INTERFACE_NAME
-#define CAN_INTERFACE_NAME "can0"
-#endif
-
 namespace
 {
 int m_can_socket{-1};
 }
 
-bool can_init()
+bool can_init(const char* interface_name)
 {
    m_can_socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
 
    /* Locate the interface you wish to use */
    struct ifreq ifr;
-   strcpy(ifr.ifr_name, CAN_INTERFACE_NAME);
+   strcpy(ifr.ifr_name, interface_name);
    ioctl(m_can_socket, SIOCGIFINDEX,
          &ifr); /* ifr.ifr_ifindex gets filled with that device's index */
 

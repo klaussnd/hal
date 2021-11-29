@@ -24,7 +24,7 @@ enum class Blocking
    YES
 };
 
-bool can_init();
+bool can_init(const char* interface_name);
 bool can_close();
 
 /** Check if a new CAN message is available */
