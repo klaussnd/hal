@@ -27,14 +27,14 @@ struct Si1145Data
 
 enum class Si1145Gain
 {
-   DIV_1,
-   DIV_2,
-   DIV_4,
-   DIV_8,
-   DIV_16,
-   DIV_32,
-   DIV_64,
-   DIV_128
+   DIV_1 = 0,
+   DIV_2 = 1,
+   DIV_4 = 2,
+   DIV_8 = 3,
+   DIV_16 = 4,
+   DIV_32 = 5,
+   DIV_64 = 6,
+   DIV_128 = 7,
 };
 
 enum class Si1145IrPhotodiode
@@ -63,6 +63,12 @@ std::optional<bool> si1145IsMeasurementFinished();
 std::optional<Si1145Data> si1145ReadMeasurement();
 bool si1145SetVisMode(Si1145Range range, Si1145Gain gain);
 bool si1145SetIrMode(Si1145Range range, Si1145Gain gain, Si1145IrPhotodiode photodiode);
+
+std::optional<Si1145Range> si1145GetVisRange();
+std::optional<Si1145Gain> si1145GetVisGain();
+std::optional<Si1145Range> si1145GetIrRange();
+std::optional<Si1145Gain> si1145GetIrGain();
+std::optional<Si1145IrPhotodiode> si1145GetIrPhotoduiode();
 
 // Utility functions (implemented in si1145_helper.cpp)
 /// Return the logical value, i.e. the gain as a number

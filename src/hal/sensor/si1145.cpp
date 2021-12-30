@@ -137,6 +137,9 @@
 #define SI114X_IRQEN_PS2 0x08
 #define SI114X_IRQEN_PS3 0x10
 
+// PS_ADC_MISC bits
+#define SI114X_HIGHRANGE (1 << 5)
+
 // Error status returned in the response register
 #define SI114X_ERROR_INVALID_SETTING 0x80
 #define SI114X_ERROR_PS1_ADC_OVERFLOW 0x88
@@ -165,8 +168,9 @@ bool waitForMeasurementCompleted();
 void clearInterrupt();
 
 uint8_t getGainValue(Si1145Gain gain);
-uint8_t getRangeValue(Si1145Range range);
+Si1145Gain getGainFromValue(uint8_t gain);
 uint8_t getPhotodiodeValue(Si1145IrPhotodiode photodiode);
+Si1145IrPhotodiode getPhotodiodeFromValue(uint8_t photodiode);
 }  // namespace
 
 bool si1145Init()
@@ -239,7 +243,8 @@ bool si1145SetVisMode(Si1145Range range, Si1145Gain gain)
    return writeParamData(SI114X_ALS_VIS_ADC_GAIN, gain_value)
           && writeParamData(SI114X_ALS_VIS_ADC_COUNTER,
                             static_cast<uint8_t>(complement << 4))
-          && writeParamData(SI114X_ALS_VIS_ADC_MISC, getRangeValue(range));
+          && writeParamData(SI114X_ALS_VIS_ADC_MISC,
+                            range == Si1145Range::HIGH ? SI114X_HIGHRANGE : 0);
 }
 
 bool si1145SetIrMode(Si1145Range range, Si1145Gain gain, Si1145IrPhotodiode photodiode)
@@ -255,10 +260,61 @@ bool si1145SetIrMode(Si1145Range range, Si1145Gain gain, Si1145IrPhotodiode phot
    if (old_misc_value.has_value())
    {
       const uint8_t new_misc_value =
-         (old_misc_value.value() & ~(1 << 5)) | getRangeValue(range);
+         (old_misc_value.value() & ~SI114X_HIGHRANGE)
+         | (range == Si1145Range::HIGH ? SI114X_HIGHRANGE : 0);
       isOk &= writeParamData(SI114X_ALS_IR_ADC_MISC, new_misc_value);
    }
    return isOk;
+}
+
+std::optional<Si1145Range> si1145GetVisRange()
+{
+   const auto reg = readParamData(SI114X_ALS_VIS_ADC_MISC);
+   if (reg.has_value())
+   {
+      return (reg.value() & SI114X_HIGHRANGE) ? Si1145Range::HIGH : Si1145Range::NORMAL;
+   }
+   return {};
+}
+
+std::optional<Si1145Gain> si1145GetVisGain()
+{
+   const auto gain_value = readParamData(SI114X_ALS_VIS_ADC_GAIN);
+   if (gain_value.has_value())
+   {
+      return getGainFromValue(gain_value.value());
+   }
+   return {};
+}
+
+std::optional<Si1145Range> si1145GetIrRange()
+{
+   const auto reg = readParamData(SI114X_ALS_IR_ADC_MISC);
+   if (reg.has_value())
+   {
+      return (reg.value() & SI114X_HIGHRANGE) ? Si1145Range::HIGH : Si1145Range::NORMAL;
+   }
+   return {};
+}
+
+std::optional<Si1145Gain> si1145GetIrGain()
+{
+   const auto gain_value = readParamData(SI114X_ALS_IR_ADC_GAIN);
+   if (gain_value.has_value())
+   {
+      return getGainFromValue(gain_value.value());
+   }
+   return {};
+}
+
+std::optional<Si1145IrPhotodiode> si1145GetIrPhotoduiode()
+{
+   const auto mux_value = readParamData(SI114X_ALS_IR_ADC_MUX);
+   if (mux_value.has_value())
+   {
+      return getPhotodiodeFromValue(mux_value.value());
+   }
+   return {};
 }
 
 namespace
@@ -383,40 +439,14 @@ void clearInterrupt()
    }
 }
 
-uint8_t getGainValue(Si1145Gain gain)
+inline uint8_t getGainValue(Si1145Gain gain)
 {
-   switch (gain)
-   {
-   case Si1145Gain::DIV_1:
-      return 0x00;
-   case Si1145Gain::DIV_2:
-      return 0x01;
-   case Si1145Gain::DIV_4:
-      return 0x02;
-   case Si1145Gain::DIV_8:
-      return 0x03;
-   case Si1145Gain::DIV_16:
-      return 0x04;
-   case Si1145Gain::DIV_32:
-      return 0x05;
-   case Si1145Gain::DIV_64:
-      return 0x06;
-   case Si1145Gain::DIV_128:
-      return 0x07;
-   }
-   return 0;  // should not happen
+   return static_cast<uint8_t>(gain);
 }
 
-uint8_t getRangeValue(Si1145Range range)
+inline Si1145Gain getGainFromValue(uint8_t gain)
 {
-   switch (range)
-   {
-   case Si1145Range::NORMAL:
-      return 0;
-   case Si1145Range::HIGH:
-      return (1 << 5);
-   }
-   return 0;  // should not happen
+   return static_cast<Si1145Gain>(gain);
 }
 
 uint8_t getPhotodiodeValue(Si1145IrPhotodiode photodiode)
@@ -429,5 +459,17 @@ uint8_t getPhotodiodeValue(Si1145IrPhotodiode photodiode)
       return 0x03;
    }
    return 0;  // should not happen
+}
+
+Si1145IrPhotodiode getPhotodiodeFromValue(uint8_t photodiode)
+{
+   switch (photodiode)
+   {
+   case 0x00:
+      return Si1145IrPhotodiode::SMALL;
+   case 0x03:
+      return Si1145IrPhotodiode::LARGE;
+   }
+   return Si1145IrPhotodiode::SMALL;  // should not happen
 }
 }  // namespace

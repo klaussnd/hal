@@ -31,6 +31,9 @@ struct Param
 Param parseArguments(const int argc, const char* const argv[]);
 void standardMeasurement(int interval);
 void exposureTest();
+template <typename T>
+void checkEqual(const T& nominal_value, const std::optional<T>& read_value,
+                const std::string& message);
 
 std::ostream& operator<<(std::ostream& os, const Si1145Gain gain);
 std::ostream& operator<<(std::ostream& os, const Si1145Range range);
@@ -118,6 +121,12 @@ void exposureTest()
             }
             std::this_thread::sleep_for(std::chrono::microseconds(64));
 
+            checkEqual(range, si1145GetVisRange(), "VIS range");
+            checkEqual(gain, si1145GetVisGain(), "VIS gain");
+            checkEqual(range, si1145GetIrRange(), "IR range");
+            checkEqual(gain, si1145GetIrGain(), "IR gain");
+            checkEqual(ir_photodiode, si1145GetIrPhotoduiode(), "IR photodiode");
+
             for (int i = 0; i < 10; ++i)
             {
                bool ok = false;
@@ -194,6 +203,21 @@ Param parseArguments(const int argc, const char* const argv[])
    {
       std::cerr << "Error in argument parsing: " << err.what() << std::endl;
       exit(1);
+   }
+}
+
+template <typename T>
+void checkEqual(const T& nominal_value, const std::optional<T>& read_value,
+                const std::string& message)
+{
+   if (!read_value.has_value())
+   {
+      std::cerr << "Error: Unable to read " << message << std::endl;
+   }
+   else if (read_value.value() != nominal_value)
+   {
+      std::cerr << "Error: " << message << " could not be set: nominal " << nominal_value
+                << " vs. actual " << read_value.value() << std::endl;
    }
 }
 
