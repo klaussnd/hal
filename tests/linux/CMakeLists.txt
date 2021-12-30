@@ -37,6 +37,7 @@ add_executable(test_sensor_light
     ${SOURCE_DIR}/hal/linux/i2c_master.cpp
     ${SOURCE_DIR}/hal/sensor/si1145.cpp
     ${SOURCE_DIR}/hal/sensor/si1145_helper.cpp
+    ${SOURCE_DIR}/hal/sensor/si1145_autoexp.cpp
     ${SOURCE_DIR}/hal/linux/i2c_master.cpp
 )
 target_include_directories(test_sensor_light

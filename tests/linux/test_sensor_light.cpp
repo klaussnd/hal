@@ -69,14 +69,14 @@ int main(int argc, char** argv)
 
 void standardMeasurement(int interval)
 {
+   std::cout << "time,range,gain,vis" << std::endl;
    while (1)
    {
-      si1145StartMeasurement();
-      const auto data = si1145ReadMeasurement();
+      const auto data = si1145MakeAutoVisMeasurement();
       if (data)
       {
-         std::cout << std::time(nullptr) << " VIS " << data->vis << " IR " << data->ir
-                   << std::endl;
+         std::cout << std::time(nullptr) << ',' << data->range << ',' << data->gain << ','
+                   << data->raw << std::endl;
       }
       else
       {
