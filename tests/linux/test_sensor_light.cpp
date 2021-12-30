@@ -199,7 +199,7 @@ Param parseArguments(const int argc, const char* const argv[])
 
 std::ostream& operator<<(std::ostream& os, const Si1145Gain gain)
 {
-   os << logicalValue(gain);
+   os << static_cast<int>(logicalValue(gain));
    return os;
 }
 
