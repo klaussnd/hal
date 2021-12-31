@@ -15,6 +15,7 @@ set(INC_DIR ${CMAKE_SOURCE_DIR}/../../include)
 set(STDCPP_INC_DIR ${CMAKE_SOURCE_DIR}/../../avr-libstdcpp/include)
 
 add_compile_definitions(F_CPU=${MCU_FREQ})
+add_compile_definitions(I2C_BITRATE=150000UL)
 
 add_avr_executable(test_usart
     test_usart.cpp
