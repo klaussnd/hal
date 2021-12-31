@@ -24,7 +24,7 @@ def plot_ir(data, title=None):
             lbl = 'IR ' + ir_photodiode + ', range ' + r
             if is_fittable:
                 coeff = np.polynomial.polynomial.polyfit(fit_data['gain'], fit_data['ir'], 1)
-                lbl +=  ': {:.1f}gain + {:.1f}'.format(coeff[1], coeff[0])
+                lbl +=  ': {:.1f}*gain + {:.1f}'.format(coeff[1], coeff[0])
             plt.scatter(sub_data['gain'], 
                         sub_data['ir'],
                         color=colours[i], 
@@ -57,11 +57,23 @@ def plot_vis(data, title=None):
         lbl = 'Range ' + r
         if is_fittable:
             coeff = np.polynomial.polynomial.polyfit(fit_data['gain'],fit_data['vis'], 1)
-            lbl += ': {:.1f}gain + {:.1f}'.format(coeff[1], coeff[0])
-        plt.scatter(sub_data['gain'],
-                    sub_data['vis'],
+            lbl += ': {:.1f}*gain + {:.1f}'.format(coeff[1], coeff[0])
+            if r == 'high':
+                lbl += '; 14.5*slope = {:.1f}'.format(coeff[1] * 14.5)
+
+        x = []
+        y = []
+        yerr = []
+        gains = sub_data.gain.unique()
+        for g in gains:
+           x.append(g)
+           values = sub_data[sub_data['gain'] == g]['vis']
+           y.append(np.mean(values))
+           yerr.append(np.std(values))
+        plt.errorbar(x, y, yerr,
                     color=colours[i], 
-                    label=lbl)
+                    label=lbl,
+                    fmt='o')
         if is_fittable:
             plt.plot(fit_data['gain'],
                      np.polynomial.polynomial.polyval(fit_data['gain'], coeff),
@@ -75,21 +87,22 @@ def plot_vis(data, title=None):
     if title is not None:
         plt.title(title)
 
+if __name__ == "__main__":
+    if len(sys.argv) <= 1:
+        print('No datafile')
+        sys.exit(1)
 
-if len(sys.argv) <= 1:
-    print('No datafile')
-    sys.exit(1)
-
-input_file = sys.argv[1]
-title = None if len(sys.argv) <= 2 else sys.argv[2]
+    input_file = sys.argv[1]
+    title = None if len(sys.argv) <= 2 else sys.argv[2]
     
-data = pd.read_csv(input_file)
-# mask over-exposed values
-data = data.replace(0xffff, np.nan)
-plt.figure()
-plot_vis(data, title)
-plt.savefig(input_file + '_vis.svg')
-plt.figure()
-plot_ir(data, title)
-plt.savefig(input_file + '_ir.svg')
-plt.show()
+    data = pd.read_csv(input_file)
+    # mask over-exposed values
+    data = data.replace(0xffff, np.nan)
+
+    plt.figure()
+    plot_vis(data, title)
+    plt.savefig(input_file + '_vis.svg')
+    plt.figure()
+    plot_ir(data, title)
+    plt.savefig(input_file + '_ir.svg')
+    plt.show()
