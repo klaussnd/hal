@@ -152,6 +152,13 @@
 // i2c address
 #define SI114X_ADDR 0X60
 
+enum class WriteCommandStatus
+{
+   SUCCESS,
+   FAILURE,
+   RETRY,
+};
+
 namespace
 {
 void reset();
@@ -161,8 +168,9 @@ std::optional<uint16_t> readWord(uint8_t reg);
 bool writeByte(uint8_t reg, uint8_t value);
 // read/write data from configuration RAM
 std::optional<uint8_t> readParamData(uint8_t reg);
-bool writeCommand(uint8_t cmd);
 bool writeParamData(uint8_t reg, uint8_t value);
+bool writeCommand(uint8_t cmd);
+WriteCommandStatus writeCommandOnce(uint8_t cmd);
 
 bool waitForMeasurementCompleted();
 void clearInterrupt();
@@ -183,21 +191,22 @@ bool si1145Init()
    reset();
 
    // set which inputs are enabled
-   writeParamData(SI114X_CHLIST,
-                  SI114X_CHLIST_ENUV | SI114X_CHLIST_ENALSIR | SI114X_CHLIST_ENALSVIS);
+   bool ok = writeParamData(
+      SI114X_CHLIST, SI114X_CHLIST_ENUV | SI114X_CHLIST_ENALSIR | SI114X_CHLIST_ENALSVIS);
 
    // Disable all LEDs
-   writeParamData(SI114X_PSLED12_SELECT, 0);
-   writeParamData(SI114X_PSLED3_SELECT, 0);
+   ok |= writeParamData(SI114X_PSLED12_SELECT, 0);
+   ok |= writeParamData(SI114X_PSLED3_SELECT, 0);
 
-   si1145SetVisMode(Si1145Range::HIGH, Si1145Gain::DIV_1);
-   si1145SetIrMode(Si1145Range::HIGH, Si1145Gain::DIV_1, Si1145IrPhotodiode::SMALL);
+   // set ADCs
+   ok |= si1145SetVisMode(Si1145Range::HIGH, Si1145Gain::DIV_1);
+   ok |= si1145SetIrMode(Si1145Range::HIGH, Si1145Gain::DIV_1, Si1145IrPhotodiode::LARGE);
 
    // interrupt enable
-   writeByte(SI114X_INT_CFG, SI114X_INT_CFG_INTOE);  // enable interrupt pin
-   writeByte(SI114X_IRQ_ENABLE, SI114X_IRQEN_ALS);
+   ok |= writeByte(SI114X_INT_CFG, SI114X_INT_CFG_INTOE);  // enable interrupt pin
+   ok |= writeByte(SI114X_IRQ_ENABLE, SI114X_IRQEN_ALS);
 
-   return true;
+   return ok;
 }
 
 bool si1145StartMeasurement()
@@ -361,42 +370,6 @@ bool writeByte(uint8_t reg, uint8_t value)
    return i2cMasterWrite(SI114X_ADDR, buf, sizeof(buf)) == I2cStatus::SUCCESS;
 }
 
-bool writeCommand(uint8_t cmd)
-{
-   if (!writeByte(SI114X_COMMAND, SI114X_NOP))  // clear response register
-   {
-      return false;
-   }
-   auto response = readByte(SI114X_RESPONSE);
-   const bool is_ok = response.has_value()
-                      && response.value() == 0x00  // verify response register cleared
-                      && writeByte(SI114X_COMMAND, cmd);  // write to command register
-   if (!is_ok)
-   {
-      return false;
-   }
-
-   for (uint8_t i = 0; i < 250; ++i)
-   {
-      response = readByte(SI114X_RESPONSE);
-      if (!response.has_value())
-      {
-         return false;
-      }
-      if (response.value() > 0)
-      {
-         const bool is_error = (response.value() & 0xf0) != 0;
-         const bool is_overflow = is_error && (response.value() & 0x0f) >= 0x08;
-         // don't regard overflow as an error
-         // it can easily be detected by checking if the value is 0xffff
-         return !is_error || is_overflow;
-      }
-      delay_us(100);
-   }
-   // abort if response remains 0 for more than 25ms
-   return false;
-}
-
 std::optional<uint8_t> readParamData(uint8_t reg)
 {
    if (writeCommand(SI114X_QUERY | reg))  // query command
@@ -418,6 +391,55 @@ bool writeParamData(uint8_t reg, uint8_t value)
       return set_value && set_value.value() == value;
    }
    return false;
+}
+
+bool writeCommand(uint8_t cmd)
+{
+   WriteCommandStatus status = WriteCommandStatus::RETRY;
+   for (uint8_t try_count = 0; status == WriteCommandStatus::RETRY && try_count < 10;
+        ++try_count)
+   {
+      status = writeCommandOnce(cmd);
+   }
+
+   return status == WriteCommandStatus::SUCCESS;
+}
+
+WriteCommandStatus writeCommandOnce(uint8_t cmd)
+{
+   if (!writeByte(SI114X_COMMAND, SI114X_NOP))  // clear response register
+   {
+      return WriteCommandStatus::FAILURE;
+   }
+   auto response = readByte(SI114X_RESPONSE);
+   const bool is_ok = response.has_value()
+                      && response.value() == 0x00  // verify response register cleared
+                      && writeByte(SI114X_COMMAND, cmd);  // write to command register
+   if (!is_ok)
+   {
+      return WriteCommandStatus::FAILURE;
+   }
+
+   for (uint8_t i = 0; i < 50; ++i)
+   {
+      response = readByte(SI114X_RESPONSE);
+      if (!response.has_value())
+      {
+         return WriteCommandStatus::FAILURE;
+      }
+      if (response.value() > 0)
+      {
+         const bool is_error = (response.value() & 0xf0) != 0;
+         const bool is_overflow = is_error && (response.value() & 0x0f) >= 0x08;
+         // don't regard overflow as an error
+         // it can easily be detected by checking if the value is 0xffff
+         return !is_error || is_overflow ? WriteCommandStatus::SUCCESS
+                                         : WriteCommandStatus::FAILURE;
+      }
+      delay_us(500);
+   }
+   // retry if response remains 0 for more than 25ms
+   return WriteCommandStatus::RETRY;
 }
 
 bool waitForMeasurementCompleted()
