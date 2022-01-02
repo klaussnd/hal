@@ -96,8 +96,8 @@ avr_target_include_directories(test_i2c_si7021
         ${STDCPP_INC_DIR}
 )
 
-add_avr_executable(test_i2c_si1145
-   test_i2c_si1145.cpp
+add_avr_executable(test_sensor_light
+   test_sensor_light.cpp
    ${SOURCE_DIR}/hal/avr/i2c_master_general.cpp
    ${SOURCE_DIR}/hal/avr/i2c_master_twi.cpp
    ${SOURCE_DIR}/hal/avr/i2c_master_detail.h
@@ -107,7 +107,7 @@ add_avr_executable(test_i2c_si1145
    ${SOURCE_DIR}/hal/sensor/si1145_helper.cpp
    ${SOURCE_DIR}/hal/sensor/si1145_autoexp.cpp
 )
-avr_target_include_directories(test_i2c_si1145
+avr_target_include_directories(test_sensor_light
     PRIVATE
         ${INC_DIR}
         ${STDCPP_INC_DIR}
