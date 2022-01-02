@@ -105,6 +105,7 @@ add_avr_executable(test_i2c_si1145
    ${SOURCE_DIR}/hal/avr/usart_stdout.c
    ${SOURCE_DIR}/hal/sensor/si1145.cpp
    ${SOURCE_DIR}/hal/sensor/si1145_helper.cpp
+   ${SOURCE_DIR}/hal/sensor/si1145_autoexp.cpp
 )
 avr_target_include_directories(test_i2c_si1145
     PRIVATE

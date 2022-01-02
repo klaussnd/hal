@@ -13,7 +13,8 @@ enum class MeasurementType
 {
    NONE,
    CONTINUOUS,
-   EXPOSURE,
+   AUTOEXPOSURE,
+   EXPOSURE_SERIES,
 };
 
 struct Settings
@@ -22,7 +23,8 @@ struct Settings
 };
 
 void makeSingleMeasurement();
-void makeExposureRow();
+void makeAutoExposureMeasurement();
+void makeExposureSeries();
 void handleInput(Settings& settings);
 
 int main(void)
@@ -51,8 +53,12 @@ int main(void)
       case MeasurementType::CONTINUOUS:
          makeSingleMeasurement();
          break;
-      case MeasurementType::EXPOSURE:
-         makeExposureRow();
+      case MeasurementType::AUTOEXPOSURE:
+         makeAutoExposureMeasurement();
+         settings.measure = MeasurementType::NONE;
+         break;
+      case MeasurementType::EXPOSURE_SERIES:
+         makeExposureSeries();
          settings.measure = MeasurementType::NONE;
          break;
       case MeasurementType::NONE:
@@ -65,7 +71,11 @@ int main(void)
 
 void makeSingleMeasurement()
 {
-   si1145StartMeasurement();
+   if (!si1145StartMeasurement())
+   {
+      usartWriteString_P(PSTR("Start meas failed\n"));
+      return;
+   }
    const auto values = si1145ReadMeasurement();
    if (values)
    {
@@ -77,7 +87,21 @@ void makeSingleMeasurement()
    }
 }
 
-void makeExposureRow()
+void makeAutoExposureMeasurement()
+{
+   const auto data = si1145MakeAutoVisMeasurement();
+   if (data.has_value())
+   {
+      usartWriteString_P(asString(data->range));
+      fprintf_P(usart_stdout, PSTR(",%d,%d\n"), logicalValue(data->gain), data->raw);
+   }
+   else
+   {
+      usartWriteString_P(PSTR("Measurement failed\n"));
+   }
+}
+
+void makeExposureSeries()
 {
    const Si1145Gain gains[] PROGMEM = {
       Si1145Gain::DIV_1,  Si1145Gain::DIV_2,  Si1145Gain::DIV_4,  Si1145Gain::DIV_8,
@@ -102,12 +126,12 @@ void makeExposureRow()
 
             if (!si1145SetVisMode(range, gain))
             {
-               usartWriteString_P(PSTR("Unable to set VIS mode!"));
+               usartWriteString_P(PSTR("Unable to set VIS mode!\n"));
                return;
             }
             if (!si1145SetIrMode(range, gain, ir_photodiode))
             {
-               usartWriteString_P(PSTR("Unable to set IR mode!"));
+               usartWriteString_P(PSTR("Unable to set IR mode!\n"));
                return;
             }
             _delay_ms(64);
@@ -118,12 +142,12 @@ void makeExposureRow()
                for (int try_count = 0; !(ok = si1145StartMeasurement()) && try_count < 10;
                     ++try_count)
                {
-                  usartWriteString_P(PSTR("Unable to start measurement"));
+                  usartWriteString_P(PSTR("Unable to start measurement, try again\n"));
                   _delay_ms(64);
                }
                if (!ok)
                {
-                  usartWriteString_P(PSTR("Failed"));
+                  usartWriteString_P(PSTR("Failed\n"));
                   return;
                }
                const auto meas = si1145ReadMeasurement();
@@ -139,7 +163,8 @@ void makeExposureRow()
                {
                   usartWriteString_P(PSTR("Unable to read measurements"));
                }
-               _delay_ms(64);
+               usartWriteString_P(PSTR("\n"));
+               _delay_ms(250);
             }
          }
       }
@@ -155,7 +180,7 @@ std::optional<Si1145Gain> gainFromLogicalValue(uint8_t value);
 #define assertTokenCount(expected_count)                                                 \
    if (token_count != expected_count)                                                    \
    {                                                                                     \
-      usartWriteString_P(PSTR("Incorrect number of arguments"));                         \
+      fprintf_P(usart_stdout, PSTR("Incorrect number of arguments %d\n"), token_count);  \
       return;                                                                            \
    }
 
@@ -164,7 +189,7 @@ void handleInput(Settings& settings)
    char buf[16];
    const uint8_t byte_count = usartReadLine(buf, sizeof(buf) - 1);
    buf[byte_count] = '\0';
-   char* tokens[MAX_TOKEN_COUNT];
+   char* tokens[MAX_TOKEN_COUNT + 1];
    const uint8_t token_count = splitArguments(buf, tokens);
    if (token_count == 0)
    {
@@ -178,16 +203,20 @@ void handleInput(Settings& settings)
       usartWriteString_P(PSTR("m - start measurement\n"
                               "s - stop\n"
                               "e - exposure sweep\n"
+                              "a - auto exposure measurement\n"
                               "v <range> <gain> - set vis\n"));
       break;
    case 'm':
       settings.measure = MeasurementType::CONTINUOUS;
       break;
+   case 'a':
+      settings.measure = MeasurementType::AUTOEXPOSURE;
+      break;
    case 's':
       settings.measure = MeasurementType::NONE;
       break;
    case 'e':
-      settings.measure = MeasurementType::EXPOSURE;
+      settings.measure = MeasurementType::EXPOSURE_SERIES;
       break;
    case 'v':
    {
@@ -213,12 +242,12 @@ uint8_t splitArguments(char* buf, char* tokens[])
    char* last;
    uint8_t count = 0;
    tokens[count] = strtok_rP(buf, delimiter_chars, &last);
-   while (tokens[count] && count < MAX_TOKEN_COUNT - 1)
+   while (tokens[count] && count < MAX_TOKEN_COUNT)
    {
       ++count;
       tokens[count] = strtok_rP(nullptr, delimiter_chars, &last);
    }
-   for (uint8_t i = count + 1; i < MAX_TOKEN_COUNT; ++i)
+   for (uint8_t i = count + 1; i <= MAX_TOKEN_COUNT; ++i)
    {
       tokens[i] = nullptr;
    }
