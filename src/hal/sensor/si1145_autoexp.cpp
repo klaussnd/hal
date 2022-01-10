@@ -59,7 +59,12 @@ Si1145Gain& operator--(Si1145Gain& gain);
 
 bool tryHigherSignal(Si1145Range& range, Si1145Gain& gain)
 {
-   if (gain != Si1145Gain::DIV_128)
+   const bool can_try_higher_gain =
+      (range == Si1145Range::NORMAL && gain < Si1145Gain::DIV_128)
+      // If high range, go back to normal mode already at gain 32.
+      // Don't use gain 128 with high range, as it sometimes leads to wrong data.
+      || (range == Si1145Range::HIGH && gain < Si1145Gain::DIV_32);
+   if (can_try_higher_gain)
    {
       ++gain;
       return true;
@@ -67,7 +72,7 @@ bool tryHigherSignal(Si1145Range& range, Si1145Gain& gain)
    else if (range == Si1145Range::HIGH)
    {
       range = Si1145Range::NORMAL;  // changes the gain by a factor of 14.5
-      gain = Si1145Gain::DIV_16;
+      gain = Si1145Gain::DIV_2;
       return true;
    }
 
@@ -76,7 +81,7 @@ bool tryHigherSignal(Si1145Range& range, Si1145Gain& gain)
 
 bool tryLowerSignal(Si1145Range& range, Si1145Gain& gain)
 {
-   if (gain != Si1145Gain::DIV_1)
+   if (gain > Si1145Gain::DIV_1)
    {
       --gain;
       return true;
