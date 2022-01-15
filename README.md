@@ -1,6 +1,6 @@
 # Hardware abstraction layer with common interface for AVR and Linux
 
-This is a hardware abstraction layer written in C++ which aims at provide a common API for basic hardware functions for both [AVR](https://en.wikipedia.org/wiki/AVR_microcontrollers) microcontrollers and Linux based single-board computers like the Raspberry Pi or Beagle Bone. The aim is to have an API which is as similar as possible on both platforms, such that code on top of the API like sensor drivers can be re-used for both platforms.
+This is a hardware abstraction layer written in C++ which aims at providing a common API for basic hardware functions for both [AVR](https://en.wikipedia.org/wiki/AVR_microcontrollers) microcontrollers and Linux based single-board computers like the Raspberry Pi or Beagle Bone. The aim is to have an API which is as similar as possible on both platforms, such that code on top of the API like sensor drivers can be re-used for both platforms.
 
 The project uses C++17 and thus requires a C++17 compatible compiler. On AVR, you might need to [obtain a compatible toolchain](https://github.com/modm-io/avr-gcc), since the avr-gcc shipped with common Linux distributions is too old. For AVR, the [standard C++ library provided by modm](https://github.com/modm-io/avr-libstdcpp.git) and an [AVR CMake toolchain file](https://github.com/mkleemann/cmake-avr.git) are used as submodules.
 
@@ -22,9 +22,9 @@ The following low-level hardware devices are currently supported:
 
 The following sensors are currently supported:
 
+* [Si1145 light sensor](doc/sensor-si1145.md)
 * HYT939 temperature and humidity sensor
 * Si7021 temperature and humidity sensor
-* Si1145 light sensor
 
 # Tests and examples
 
