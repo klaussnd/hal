@@ -42,6 +42,18 @@ def plot_ir(data, title=None):
     if title is not None:
         plt.title(title)
 
+def compute_mean_stddev_for_each_gain(subdata):
+    x = []
+    y = []
+    yerr = []
+    gains = sub_data.gain.unique()
+    for g in gains:
+       x.append(g)
+       values = sub_data[sub_data['gain'] == g]['vis']
+       y.append(np.mean(values))
+       yerr.append(np.std(values))
+    return x, y, yerr
+
 def plot_vis(data, title=None):
     colours = ('blue', 'red')
     ranges = data.range.unique()
@@ -60,16 +72,7 @@ def plot_vis(data, title=None):
             lbl += ': {:.1f}*gain + {:.1f}'.format(coeff[1], coeff[0])
             if r == 'high':
                 lbl += '; 14.5*slope = {:.1f}'.format(coeff[1] * 14.5)
-
-        x = []
-        y = []
-        yerr = []
-        gains = sub_data.gain.unique()
-        for g in gains:
-           x.append(g)
-           values = sub_data[sub_data['gain'] == g]['vis']
-           y.append(np.mean(values))
-           yerr.append(np.std(values))
+        x, y, yerr = compute_mean_stddev_for_each_gain(sub_data)
         plt.errorbar(x, y, yerr,
                     color=colours[i], 
                     label=lbl,
@@ -87,6 +90,13 @@ def plot_vis(data, title=None):
     if title is not None:
         plt.title(title)
 
+def remove_invalid_data(data):
+    # mask over-exposed values
+    data = data.replace(0xffff, np.nan)
+    # remove data that have settings that sometimes give wrong results
+    data.loc[(data['gain'] == 128) & (data['range'] == 'high'), 'vis'] = np.nan
+    return data
+
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
         print('No datafile')
@@ -96,8 +106,7 @@ if __name__ == "__main__":
     title = None if len(sys.argv) <= 2 else sys.argv[2]
     
     data = pd.read_csv(input_file)
-    # mask over-exposed values
-    data = data.replace(0xffff, np.nan)
+    data = remove_invalid_data(data)
 
     plt.figure()
     plot_vis(data, title)
