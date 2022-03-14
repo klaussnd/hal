@@ -127,3 +127,12 @@ avr_target_include_directories(test_i2c_hyt939
         ${INC_DIR}
         ${STDCPP_INC_DIR}
 )
+
+add_avr_executable(test_timer
+    test_timer.cpp
+)
+avr_target_include_directories(test_timer
+    PRIVATE
+        ${INC_DIR}
+        ${STDCPP_INC_DIR}
+)
