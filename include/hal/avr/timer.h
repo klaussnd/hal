@@ -71,7 +71,10 @@
 /** set timer to normal mode */
 #define TMR_SET_NORMAL(tmr_no) TMR_SET_NORMAL_X(tmr_no)
 
-/** set timer to CTC mode */
+/** set timer to CTC mode
+ *  for timer0 and timer2, top = OCRn
+ *  for timer1, top = ICR1
+ */
 #define TMR_SET_CTC(tmr_no) TMR_SET_CTC_X(tmr_no)
 
 /** Set timer @e tmr_no prescaler to value @e pre
