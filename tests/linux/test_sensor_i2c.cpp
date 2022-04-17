@@ -1,5 +1,6 @@
 #include <hal/i2c_master.h>
 #include <hal/sensor/hyt939.h>
+#include <hal/sensor/si1145.h>
 #include <hal/sensor/si7021.h>
 #include <hal/sensor/veml6075.h>
 
@@ -22,10 +23,15 @@ int main(int argc, char** argv)
    }
    const bool has_si7021 = si7021Init();
    const bool has_veml6075 = veml6075Init();
+   const bool has_si1145 = si1145Init();
 
    if (has_veml6075)
    {
-      std::cout << "UV sensor initialised ok" << std::endl;
+      std::cout << "UV sensor found" << std::endl;
+   }
+   if (has_si1145)
+   {
+      std::cout << "Sunshine sensor found" << std::endl;
    }
 
    while (1)
@@ -81,6 +87,28 @@ int main(int argc, char** argv)
             std::cout << "--,--,--,--,--,--,--,";
          }
       }
+      else
+      {
+         std::cout << ",,,,,,,";
+      }
+      if (has_si1145)
+      {
+         const auto data = si1145MakeAutoVisMeasurement();
+         if (data)
+         {
+            constexpr unsigned int dark_current = 260u;
+            constexpr double highrange_divisor = 14.5;
+            const double extra_factor =
+               data->range == Si1145Range::HIGH ? highrange_divisor : 1.0;
+            const double gain = logicalValue(data->gain);
+            const double adc_counts_per_lux = 0.282;
+            const double lux = static_cast<double>(data->raw - dark_current) / gain
+                               * extra_factor / adc_counts_per_lux;
+
+            std::cout << lux;
+         }
+      }
+
       std::cout << std::endl;
 
       std::this_thread::sleep_for(std::chrono::seconds(INTERVAL));
