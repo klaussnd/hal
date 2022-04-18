@@ -22,9 +22,10 @@ The following low-level hardware devices are currently supported:
 
 The following sensors are currently supported:
 
-* [Si1145 light sensor](doc/sensor-si1145.md)
-* HYT939 temperature and humidity sensor
-* Si7021 temperature and humidity sensor
+* [Si1145 light sensor](doc/sensor-si1145.md) ([datasheet](https://www.silabs.com/documents/public/data-sheets/Si1145-46-47.pdf))
+* VEML6075 UV sensor ([datasheet](https://cdn.sparkfun.com/assets/3/c/3/2/f/veml6075.pdf), [application note](https://cdn.sparkfun.com/assets/3/9/d/4/1/designingveml6075.pdf))
+* HYT939 temperature and humidity sensor ([datasheet](https://www.ist-ag.com/sites/default/files/hyt939p.pdf))
+* Si7021 temperature and humidity sensor ([datasheet](https://www.silabs.com/documents/public/data-sheets/Si7021-A20.pdf))
 
 # Tests and examples
 
