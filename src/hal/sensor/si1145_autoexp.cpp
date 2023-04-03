@@ -2,54 +2,87 @@
 
 namespace
 {
+enum class ChangeDirection
+{
+   NO_CHANGE,
+   HIGHER_SIGNAL,
+   LOWER_SIGNAL,
+};
+
 bool tryHigherSignal(Si1145Range& range, Si1145Gain& gain);
 bool tryLowerSignal(Si1145Range& range, Si1145Gain& gain);
 }  // namespace
 
-std::optional<Si1145VisAutoMeas> si1145MakeAutoVisMeasurement()
+Si1145AutoExposureResult si1145VisAutoExposure()
 {
    constexpr uint16_t max_raw_val = 50000u;
-   constexpr uint16_t min_raw_val = 10000u;
+   constexpr uint16_t min_raw_val = 7500u;
+
+   Si1145AutoExposureResult res = Si1145AutoExposureResult::KEPT;
 
    const auto initial_range = si1145GetVisRange();
    const auto initial_gain = si1145GetVisGain();
    if (!initial_range.has_value() || !initial_gain.has_value())
    {
-      return {};
+      return Si1145AutoExposureResult::ERROR;
    }
 
    Si1145Range range = initial_range.value();
    Si1145Gain gain = initial_gain.value();
-   uint16_t vis_raw = 0;
-   bool try_again = true;
 
-   for (uint8_t try_count = 0; try_again && try_count < 16; ++try_count)
+   auto maybe_meas = si1145MeasureVis();
+   if (!maybe_meas)
    {
-      if (!si1145StartMeasurement())
+      return Si1145AutoExposureResult::ERROR;
+   }
+   uint16_t vis_raw = maybe_meas.value();
+   ChangeDirection direction = ChangeDirection::NO_CHANGE;
+
+   for (uint8_t try_count = 0; try_count < 16; ++try_count)
+   {
+      bool make_change = false;
+      if (vis_raw < min_raw_val && direction != ChangeDirection::LOWER_SIGNAL)
       {
-         return {};
+         direction = ChangeDirection::HIGHER_SIGNAL;
+         make_change = tryHigherSignal(range, gain);
       }
-      auto value = si1145ReadMeasurement();
-      if (!value)
+      else if (vis_raw > max_raw_val && direction != ChangeDirection::HIGHER_SIGNAL)
       {
-         return {};
+         direction = ChangeDirection::LOWER_SIGNAL;
+         make_change = tryLowerSignal(range, gain);
       }
-      vis_raw = value.value().vis;
-      if ((vis_raw < min_raw_val && tryHigherSignal(range, gain))
-          || (vis_raw > max_raw_val && tryLowerSignal(range, gain)))
+
+      if (!make_change)
       {
+         break;
+      }
+
+      res = Si1145AutoExposureResult::CHANGED;
+      if (!si1145SetVisMode(range, gain))
+      {
+         return Si1145AutoExposureResult::ERROR;
+      }
+      auto maybe_meas = si1145MeasureVis();
+      if (!maybe_meas)
+      {
+         return Si1145AutoExposureResult::ERROR;
+      }
+      vis_raw = maybe_meas.value();
+
+      const bool is_overexposed = vis_raw == 0xffff;
+      if (direction == ChangeDirection::HIGHER_SIGNAL && is_overexposed)
+      {
+         // it was a bit too much, reject the last change
+         tryLowerSignal(range, gain);
          if (!si1145SetVisMode(range, gain))
          {
-            return {};
+            return Si1145AutoExposureResult::ERROR;
          }
-      }
-      else
-      {
-         try_again = false;
+         break;
       }
    }
 
-   return Si1145VisAutoMeas{vis_raw, range, gain};
+   return res;
 }
 
 namespace

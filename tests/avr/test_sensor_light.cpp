@@ -89,11 +89,19 @@ void makeSingleMeasurement()
 
 void makeAutoExposureMeasurement()
 {
-   const auto data = si1145MakeAutoVisMeasurement();
-   if (data.has_value())
+   const auto autoexp_res = si1145VisAutoExposure();
+   if (autoexp_res == Si1145AutoExposureResult::ERROR)
    {
-      usartWriteString_P(asString(data->range));
-      fprintf_P(usart_stdout, PSTR(",%d,%d\n"), logicalValue(data->gain), data->raw);
+      usartWriteString_P(PSTR("Auto-exposure failed\n"));
+      return;
+   }
+   const auto raw = si1145MeasureVis();
+   const auto range = si1145GetVisRange();
+   const auto gain = si1145GetVisGain();
+   if (raw.has_value() && range.has_value() && gain.has_value())
+   {
+      usartWriteString_P(asString(range.value()));
+      fprintf_P(usart_stdout, PSTR(",%d,%d\n"), logicalValue(gain.value()), raw.value());
    }
    else
    {

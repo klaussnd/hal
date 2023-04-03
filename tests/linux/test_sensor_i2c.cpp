@@ -93,17 +93,20 @@ int main(int argc, char** argv)
       }
       if (has_si1145)
       {
-         const auto data = si1145MakeAutoVisMeasurement();
-         if (data)
+         const auto autoexp_res = si1145VisAutoExposure();
+         const auto raw = si1145MeasureVis();
+         const auto range = si1145GetVisRange();
+         const auto gain = si1145GetVisGain();
+         if (autoexp_res != Si1145AutoExposureResult::ERROR && raw && range && gain)
          {
             constexpr unsigned int dark_current = 260u;
             constexpr double highrange_divisor = 14.5;
             const double extra_factor =
-               data->range == Si1145Range::HIGH ? highrange_divisor : 1.0;
-            const double gain = logicalValue(data->gain);
+               range.value() == Si1145Range::HIGH ? highrange_divisor : 1.0;
+            const double gain_value = logicalValue(gain.value());
             const double adc_counts_per_lux = 0.282;
-            const double lux = static_cast<double>(data->raw - dark_current) / gain
-                               * extra_factor / adc_counts_per_lux;
+            const double lux = static_cast<double>(raw.value() - dark_current)
+                               / gain_value * extra_factor / adc_counts_per_lux;
 
             std::cout << lux;
          }

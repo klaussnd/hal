@@ -72,15 +72,22 @@ void standardMeasurement(int interval)
    std::cout << "time,range,gain,vis" << std::endl;
    while (1)
    {
-      const auto data = si1145MakeAutoVisMeasurement();
-      if (data)
+      const auto autoexp_res = si1145VisAutoExposure();
+      if (autoexp_res == Si1145AutoExposureResult::ERROR)
       {
-         std::cout << std::time(nullptr) << ',' << data->range << ',' << data->gain << ','
-                   << data->raw << std::endl;
+         std::cerr << "Auto exposure failed" << std::endl;
+      }
+      const auto raw = si1145MeasureVis();
+      const auto range = si1145GetVisRange();
+      const auto gain = si1145GetVisGain();
+      if (raw.has_value() && range.has_value() && gain.has_value())
+      {
+         std::cout << std::time(nullptr) << ',' << range.value() << ',' << gain.value()
+                   << ',' << raw.value() << std::endl;
       }
       else
       {
-         std::cout << "measurement error" << std::endl;
+         std::cerr << "Measurement error" << std::endl;
       }
 
       std::this_thread::sleep_for(std::chrono::seconds(interval));
