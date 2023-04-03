@@ -245,6 +245,20 @@ std::optional<Si1145Data> si1145ReadMeasurement()
    }
 }
 
+std::optional<uint16_t> si1145MeasureVis()
+{
+   if (!si1145StartMeasurement())
+   {
+      return {};
+   }
+   if (!waitForMeasurementCompleted())
+   {
+      return {};
+   }
+   clearInterrupt();
+   return readWord(SI114X_ALS_VIS_DATA0);
+}
+
 bool si1145SetVisMode(Si1145Range range, Si1145Gain gain)
 {
    const uint8_t gain_value = getGainValue(gain);

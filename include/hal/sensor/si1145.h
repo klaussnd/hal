@@ -68,6 +68,11 @@ std::optional<bool> si1145IsMeasurementFinished();
 /// Must call si1145StartMeasurement() before.
 /// @return The measured data, or an empty optional if an error occured.
 std::optional<Si1145Data> si1145ReadMeasurement();
+/// Convenience function: starts a measurement, waits for its completion,
+/// and returns the measured value.
+/// @return VIS value, or an empty optional in case of error
+std::optional<uint16_t> si1145MeasureVis();
+
 bool si1145SetVisMode(Si1145Range range, Si1145Gain gain);
 bool si1145SetIrMode(Si1145Range range, Si1145Gain gain, Si1145IrPhotodiode photodiode);
 
