@@ -16,7 +16,7 @@
 
 #include <inttypes.h>
 
-enum class I2cStatus
+enum class I2cStatus : uint8_t
 {
    SUCCESS,
    START_ERROR,

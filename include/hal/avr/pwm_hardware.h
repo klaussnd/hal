@@ -33,7 +33,7 @@
  */
 #define hwPwmStop(no_ch) hwPwmSet(no_ch, 0)
 
-enum class HwPwmOutput
+enum class HwPwmOutput : uint8_t
 {
    OC0A = 0x01,
    OC0B = 0x02,
@@ -43,7 +43,7 @@ enum class HwPwmOutput
    OC2B = 0x20,
 };
 
-enum class HwPwmDirection
+enum class HwPwmDirection : uint8_t
 {
    Normal,
    Inverted

@@ -152,7 +152,7 @@
 // i2c address
 #define SI114X_ADDR 0X60
 
-enum class WriteCommandStatus
+enum class WriteCommandStatus : uint8_t
 {
    SUCCESS,
    FAILURE,

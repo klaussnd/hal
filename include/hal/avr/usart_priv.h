@@ -57,7 +57,7 @@ inline uint8_t usartReadLine(char* dstbuf, uint8_t maxlength)
    return usartReadUntil(dstbuf, maxlength, '\n');
 }
 
-enum class MemoryLocation
+enum class MemoryLocation : uint8_t
 {
    RAM,
    PROGRAM_SPACE

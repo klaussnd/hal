@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 
-enum class MeasurementType
+enum class MeasurementType : uint8_t
 {
    NONE,
    CONTINUOUS,
@@ -114,7 +114,8 @@ void makeExposureSeries()
    static const Si1145Gain gains[] PROGMEM = {
       Si1145Gain::DIV_1,  Si1145Gain::DIV_2,  Si1145Gain::DIV_4,  Si1145Gain::DIV_8,
       Si1145Gain::DIV_16, Si1145Gain::DIV_32, Si1145Gain::DIV_64, Si1145Gain::DIV_128};
-   constexpr uint8_t gain_count = sizeof(gains) / sizeof(gains[0]);
+   static_assert(sizeof(gains[0]) == 1);
+   constexpr uint8_t gain_count = sizeof(gains);
    constexpr uint8_t range_count = 2;
    constexpr uint8_t ir_photodiode_count = 2;
 

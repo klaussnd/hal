@@ -3,13 +3,13 @@
 #include <cstdint>
 #include <optional>
 
-enum class Veml6075Trigger
+enum class Veml6075Trigger : uint8_t
 {
     NO_TRIGGER,
     TRIGGER_ONE_OR_UV_TRIG,
 };
 
-enum class Veml6075IntegrationTime
+enum class Veml6075IntegrationTime : uint8_t
 {
     _50MS = 0,
     _100MS,

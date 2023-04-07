@@ -16,7 +16,7 @@ constexpr uint8_t HIGH_DYNAMIC_BIT = 3;
 constexpr uint8_t INTEGRATION_TIME_SHIFT = 4;
 constexpr uint8_t INTEGRATION_TIME_MASK = 0x70;
 
-enum class Veml6075Register
+enum class Veml6075Register : uint8_t
 {
    UV_CONF = 0x00,
    UVA_DATA = 0x07,

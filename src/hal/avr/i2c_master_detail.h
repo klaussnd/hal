@@ -5,19 +5,19 @@
 #include <cstdint>
 #include <optional>
 
-enum class I2cOperation
+enum class I2cOperation : uint8_t
 {
    WRITE = 0,
    READ = 1,
 };
 
-enum class I2cWriteType
+enum class I2cWriteType : uint8_t
 {
    ADDRESS,
    DATA,
 };
 
-enum class I2cAck
+enum class I2cAck : uint8_t
 {
    ACK,
    NACK

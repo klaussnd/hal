@@ -2,7 +2,7 @@
 
 namespace
 {
-enum class ChangeDirection
+enum class ChangeDirection : uint8_t
 {
    NO_CHANGE,
    HIGHER_SIGNAL,

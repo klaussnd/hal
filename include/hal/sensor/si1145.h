@@ -25,7 +25,7 @@ struct Si1145Data
    uint16_t ir;
 };
 
-enum class Si1145Gain
+enum class Si1145Gain : uint8_t
 {
    DIV_1 = 0,
    DIV_2 = 1,
@@ -37,19 +37,19 @@ enum class Si1145Gain
    DIV_128 = 7,
 };
 
-enum class Si1145IrPhotodiode
+enum class Si1145IrPhotodiode : uint8_t
 {
    SMALL,
    LARGE
 };
 
-enum class Si1145Range
+enum class Si1145Range : uint8_t
 {
    NORMAL,
    HIGH
 };
 
-enum class Si1145AutoExposureResult
+enum class Si1145AutoExposureResult : uint8_t
 {
    CHANGED, ///< range or gain was modified
    KEPT,    ///< all settings were left unchanged
