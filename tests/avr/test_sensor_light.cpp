@@ -111,7 +111,7 @@ void makeAutoExposureMeasurement()
 
 void makeExposureSeries()
 {
-   const Si1145Gain gains[] PROGMEM = {
+   static const Si1145Gain gains[] PROGMEM = {
       Si1145Gain::DIV_1,  Si1145Gain::DIV_2,  Si1145Gain::DIV_4,  Si1145Gain::DIV_8,
       Si1145Gain::DIV_16, Si1145Gain::DIV_32, Si1145Gain::DIV_64, Si1145Gain::DIV_128};
    constexpr uint8_t gain_count = sizeof(gains) / sizeof(gains[0]);
