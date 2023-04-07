@@ -261,6 +261,11 @@ std::optional<uint16_t> si1145MeasureVis()
 
 bool si1145SetVisMode(Si1145Range range, Si1145Gain gain)
 {
+   if (gain > Si1145Gain::DIV_128)
+   {
+      return false;
+   }
+
    const uint8_t gain_value = getGainValue(gain);
    const uint8_t complement = 0x07 ^ gain_value;
    return writeParamData(SI114X_ALS_VIS_ADC_GAIN, gain_value)
