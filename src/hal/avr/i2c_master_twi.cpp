@@ -37,7 +37,7 @@ bool i2cMasterInit()
 I2cStatus i2cStart(uint8_t address, I2cOperation operation)
 {
    // Send START condition
-   TWCR = ((1 << TWINT) | (1 << TWSTA) | (1 << TWEN));
+   TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
    // Wait until transmission completed
    while (!(TWCR & (1 << TWINT)))
       ;
@@ -46,11 +46,17 @@ I2cStatus i2cStart(uint8_t address, I2cOperation operation)
    bool success = twst == TW_START || twst == TW_REP_START;
    if (!success)
    {
+      i2cStop();  // must release the bus to avoid hang-up on subsequent operations
       return I2cStatus::START_ERROR;
    }
    const uint8_t addrbyte = (address << 1) | (static_cast<uint8_t>(operation) & 0x01);
    success = i2cWriteByte(addrbyte, I2cWriteType::ADDRESS);
-   return success ? I2cStatus::SUCCESS : I2cStatus::ADDRESS_ERROR;
+   if (!success)
+   {
+      i2cStop();  // must release the bus to avoid hang-up on subsequent operations
+      return I2cStatus::ADDRESS_ERROR;
+   }
+   return I2cStatus::SUCCESS;
 }
 
 bool i2cWriteByte(uint8_t data, I2cWriteType type)
@@ -90,7 +96,7 @@ bool i2cReadByte(uint8_t* data, I2cAck ack)
 void i2cStop()
 {
    // Send stop condition
-   TWCR = ((1 << TWINT) | (1 << TWEN) | (1 << TWSTO));
+   TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);
    /* Wait until stop condition is executed and bus released
       Note: After sending a stop condition, TWINT is _not_ set again;
       however, TWSTO is cleared after the condition has been executed. */
