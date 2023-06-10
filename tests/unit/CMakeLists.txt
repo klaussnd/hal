@@ -14,6 +14,7 @@ add_subdirectory(${GOOGLETEST_DIR} gtest)
 set(tests_unit_sources
     test_fifo.cpp
     test_ringbuffer.cpp
+    test_canid.cpp
 )
 
 set(INC_DIR ${CMAKE_SOURCE_DIR}/../../include)
