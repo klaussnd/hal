@@ -77,7 +77,7 @@ diesen entprellten Tastenzustand weiter zu verarbeiten.
 #define BUTTON_MASK 0xff /* default: all 8 bits */
 #endif
 #ifndef REPEAT_MASK /* buttons where long press and/or repeat works */
-#define REPEAT_MASK BUTTON_MASK
+#define REPEAT_MASK BUTTON_MASK /* default: all buttons */
 #endif
 
 #define REPEAT_START 50  // after 500ms
@@ -87,8 +87,8 @@ namespace
 {
 volatile uint8_t button_state;  // debounced and inverted button state:
                                 // bit = 1: button pressed
-#ifndef BUTTON_HAVE_NO_PRESS
 volatile uint8_t button_press;  // button press detect
+#if REPEAT_MASK != 0
 volatile uint8_t button_rpt;    // button long press and repeat
 volatile uint8_t rpt_count;     // repeat counter
 #endif
@@ -103,7 +103,6 @@ void buttonInit(void)
    PORT(BUTTON_PORT) |= BUTTON_MASK;  // and turn on pull up resistors
 }
 
-#ifndef BUTTON_HAVE_NO_PRESS
 uint8_t buttonPress(uint8_t button_mask)
 {
    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)  // read and clear atomic!
@@ -114,6 +113,7 @@ uint8_t buttonPress(uint8_t button_mask)
    return button_mask;
 }
 
+#if REPEAT_MASK != 0
 uint8_t buttonRpt(uint8_t button_mask)
 {
    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)  // read and clear atomic!
@@ -147,12 +147,12 @@ uint8_t buttonLong(uint8_t button_mask)
    }
    return button_mask;
 }
+#endif
 
 uint8_t buttonDown(uint8_t button_mask)
 {
    return (button_state & button_mask);
 }
-#endif
 
 #ifdef BUTTON_HAVE_TOGGLE
 uint8_t buttonToggle(uint8_t button_mask)
@@ -179,9 +179,9 @@ void buttonSample(void)
 #ifdef BUTTON_HAVE_TOGGLE
    button_toggle |= i;
 #endif
-#ifndef BUTTON_HAVE_NO_PRESS
    button_press |= (button_state & i);  // 0->1: button press detect
 
+#if REPEAT_MASK != 0
    if (rpt_count == 0)
    {                                          // no repeat running
       if ((button_press & REPEAT_MASK) != 0)  // and repeat button press
