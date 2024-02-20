@@ -20,12 +20,12 @@ bool usartInit(const char* device, unsigned long baudrate)
       return false;
    }
    // tty settings: 8 databits, 1 stopbit, no parity, no canonical mode
-   struct termios newtio;
-   memset(&newtio, 0, sizeof(newtio));
-   newtio.c_cflag = CS8 | CLOCAL | CREAD;
-   newtio.c_iflag = IGNBRK;
-   newtio.c_oflag = 0;
-   newtio.c_lflag = 0;
+   struct termios options;
+   memset(&options, 0, sizeof(options));
+   if (tcgetattr(m_fd, &options) != 0)
+   {
+      return false;
+   }
    speed_t baud;
    switch (baudrate)
    {
@@ -50,15 +50,21 @@ bool usartInit(const char* device, unsigned long baudrate)
    default:
       return false;
    }
-   cfsetospeed(&newtio, baud);
-   cfsetispeed(&newtio, baud);
-   newtio.c_cc[VMIN] = 1;
-   newtio.c_cc[VTIME] = 10;  // max wait 1s
-   tcflush(m_fd, TCIOFLUSH);
-   if (tcsetattr(m_fd, TCSANOW, &newtio) == -1)
+
+   options.c_cflag = baud | CS8 | CLOCAL | CREAD;
+   options.c_iflag = IGNPAR;
+   options.c_oflag = 0;
+   options.c_lflag = 0;
+   options.c_cc[VMIN] = 1;  // set blocking
+   cfsetospeed(&options, baud);
+   cfsetispeed(&options, baud);
+
+   tcflush(m_fd, TCIFLUSH);
+   if (tcsetattr(m_fd, TCSANOW, &options) == -1)
    {
       return false;
    }
+
    return true;
 }
 
