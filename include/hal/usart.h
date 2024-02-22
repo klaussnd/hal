@@ -37,6 +37,13 @@ bool usartIsLineAvailableToRead();
  */
 uint8_t usartRead(char* dstbuf, uint8_t maxlength);
 
+/** Read from serial line (binary mode) exactly @e length bytes.
+ *  It blocks until the required number of bytes are read.
+ *  @param length The exact number of bytes to read
+ *  @return false on error
+ */
+bool usartReadExact(char* dstbuf, uint8_t length);
+
 /** Read one line from serial line (string mode)
  *  @return The number of bytes read
  */

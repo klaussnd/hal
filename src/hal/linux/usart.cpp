@@ -80,20 +80,39 @@ void usartFinalise()
 uint8_t usartBytesAvailableToRead()
 {
    int bytes_available = 0;
-   ioctl(m_fd, FIONREAD, &bytes_available);
-   return static_cast<uint8_t>(bytes_available);
+   if (ioctl(m_fd, FIONREAD, &bytes_available) == 0)
+   {
+      return static_cast<uint8_t>(bytes_available);
+   }
+   return 0;
 }
 
 uint8_t usartRead(char* dstbuf, uint8_t maxlength)
 {
    const auto res = read(m_fd, dstbuf, maxlength);
-   return res < 0 ? 0 : static_cast<uint8_t>(res);
+   return res < 0 ? 0u : static_cast<uint8_t>(res);
+}
+
+bool usartReadExact(char* dstbuf, uint8_t length)
+{
+   int bytes_received = 0;
+   do
+   {
+      const int bytes_missing = length - bytes_received;
+      bytes_received = read(m_fd, dstbuf + bytes_received, bytes_missing);
+      if (bytes_received < 0)
+      {
+         return false;
+      }
+   } while (bytes_received > length);
+
+   return true;
 }
 
 uint8_t usartWrite(const char* buf, uint8_t length)
 {
    const auto res = write(m_fd, buf, length);
-   return res < 0 ? 0 : static_cast<uint8_t>(res);
+   return res < 0 ? 0u : static_cast<uint8_t>(res);
 }
 
 uint8_t usartWriteString(const char* buf)

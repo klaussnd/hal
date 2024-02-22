@@ -78,6 +78,13 @@ bool usartIsLineAvailableToRead()
    return (m_usart_data.recv.newline_count > 0);
 }
 
+bool usartReadExact(char* dstbuf, uint8_t length)
+{
+   while (usartBytesAvailableToRead() < length)
+      ;
+   return usartReadUntil(dstbuf, length, '\0') == length;
+}
+
 uint8_t usartReadUntil(char* dstbuf, uint8_t maxlength, const char endchar)
 {
    if (endchar != 0)
@@ -220,11 +227,11 @@ inline void deactivateWriteIrq()
 AtomicBlockReceive::AtomicBlockReceive()
       : m_originalState(
 #ifdef UCSR0B
-           UCSR0B & (1 << RXCIE0)
+         UCSR0B & (1 << RXCIE0)
 #else
-           UCSRB & (1 << RXCIE);
+         UCSRB & (1 << RXCIE);
 #endif
-        )
+      )
 {
 #ifdef UCSR0B
    UCSR0B &= ~(1 << RXCIE0);
