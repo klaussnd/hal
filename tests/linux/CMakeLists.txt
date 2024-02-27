@@ -61,3 +61,13 @@ target_include_directories(socketcan_read
    PRIVATE
       ${INC_DIR}
 )
+
+add_executable(test_sensor_co2
+   test_sensor_co2.cpp
+   ${SOURCE_DIR}/hal/sensor/mhz19.cpp
+   ${SOURCE_DIR}/hal/linux/usart.cpp
+)
+target_include_directories(test_sensor_co2
+   PRIVATE
+      ${INC_DIR}
+)
