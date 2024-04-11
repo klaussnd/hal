@@ -20,8 +20,16 @@
 
 struct Hyt939Data
 {
-   uint8_t humidity; ///< percent
-   int16_t temperature; ///< decicelsius
+   uint8_t humidity;     ///< percent
+   int16_t temperature;  ///< decicelsius
 };
 
 std::optional<Hyt939Data> hyt939Measure();
+
+struct Hyt939RawData
+{
+   uint16_t humidity;
+   uint16_t temperature;
+};
+std::optional<Hyt939RawData> hyt939MeasureRaw();
+Hyt939Data hyt939Compute(const Hyt939RawData& raw);
