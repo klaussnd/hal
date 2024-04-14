@@ -53,6 +53,17 @@ target_link_libraries(test_sensor_light
       Boost::program_options
 )
 
+add_executable(test_sensor_sht3x
+    test_sensor_sht3x.cpp
+    ${SOURCE_DIR}/hal/linux/i2c_master.cpp
+    ${SOURCE_DIR}/hal/sensor/sht3x.cpp
+    ${SOURCE_DIR}/hal/linux/i2c_master.cpp
+)
+target_include_directories(test_sensor_sht3x
+   PRIVATE
+      ${INC_DIR}
+)
+
 add_executable(socketcan_read
    socketcan_read.cpp
    ${SOURCE_DIR}/hal/linux/socketcan.cpp

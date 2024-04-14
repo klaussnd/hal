@@ -26,6 +26,7 @@ The following sensors are currently supported:
 * VEML6075 UV sensor ([datasheet](https://cdn.sparkfun.com/assets/3/c/3/2/f/veml6075.pdf), [application note](https://cdn.sparkfun.com/assets/3/9/d/4/1/designingveml6075.pdf))
 * HYT939 temperature and humidity sensor ([datasheet](https://www.ist-ag.com/sites/default/files/hyt939p.pdf))
 * Si7021 temperature and humidity sensor ([datasheet](https://www.silabs.com/documents/public/data-sheets/Si7021-A20.pdf))
+* SHT3x temperature and humidity sensor ([datasheet](https://sensirion.com/resource/datasheet/sht3x-d))
 * MH-Z19 CO2 sensor ([datasheet](https://www.winsen-sensor.com/d/files/infrared-gas-sensor/mh-z19b-co2-ver1_0.pdf))
 
 # Tests and examples
