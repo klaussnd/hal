@@ -37,9 +37,9 @@ std::optional<Hyt939RawData> hyt939MeasureRaw()
    return Hyt939RawData{humi_raw, temp_raw};
 }
 
-Hyt939Data hyt939Compute(const Hyt939RawData& raw)
+TemperatureAndHumidity hyt939Compute(const Hyt939RawData& raw)
 {
-   Hyt939Data data;
+   TemperatureAndHumidity data;
    data.humidity = (static_cast<uint32_t>(raw.humidity) * 100UL)
                    / (static_cast<uint32_t>(2 << 13) - 1UL);
    const uint16_t temp_tmp = static_cast<uint32_t>(raw.temperature) * 1650UL
@@ -49,7 +49,7 @@ Hyt939Data hyt939Compute(const Hyt939RawData& raw)
    return data;
 }
 
-std::optional<Hyt939Data> hyt939Measure()
+std::optional<TemperatureAndHumidity> hyt939Measure()
 {
    const auto raw = hyt939MeasureRaw();
    if (!raw.has_value())

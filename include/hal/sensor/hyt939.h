@@ -15,16 +15,10 @@
 
 #pragma once
 
+#include <hal/sensor/temp_humi.h>
+
 #include <optional>
 #include <stdint.h>
-
-struct Hyt939Data
-{
-   uint8_t humidity;     ///< percent
-   int16_t temperature;  ///< decicelsius
-};
-
-std::optional<Hyt939Data> hyt939Measure();
 
 struct Hyt939RawData
 {
@@ -32,4 +26,6 @@ struct Hyt939RawData
    uint16_t temperature;
 };
 std::optional<Hyt939RawData> hyt939MeasureRaw();
-Hyt939Data hyt939Compute(const Hyt939RawData& raw);
+TemperatureAndHumidity hyt939Compute(const Hyt939RawData& raw);
+
+std::optional<TemperatureAndHumidity> hyt939Measure();
