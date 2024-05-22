@@ -34,25 +34,31 @@ public:
    size_type lastInsertedElementIndex() const;
    size_type elementCount() const;
    constexpr size_type capacity() const
-   { return static_cast<size_type>(buffer_size); }
+   {
+      return static_cast<size_type>(buffer_size);
+   }
    bool isFull() const;
 
 private:
    size_type getPreviousIndex(size_type index) const
-   { return (index - 1) & (capacity() - 1); }
+   {
+      return (index - 1) & (capacity() - 1);
+   }
    size_type getNextIndex(size_type index)
-   { return (index + 1) & (capacity() - 1); }
+   {
+      return (index + 1) & (capacity() - 1);
+   }
 
 private:
-   uint8_t m_writeIndex; ///< write position
-   uint8_t m_count;      ///< number of elements filled
+   uint8_t m_writeIndex;  ///< write position
+   uint8_t m_count;       ///< number of elements filled
    T m_buffer[buffer_size];
 };
 
 template <typename T, size_t buffer_size, typename S>
 RingBuffer<T, buffer_size, S>::RingBuffer()
-   : m_writeIndex(0)
-   , m_count(0)
+      : m_writeIndex(0)
+      , m_count(0)
 {
    static_assert(buffer_size % 2 == 0, "Buffer size must be a multiple of 2");
 }
@@ -61,14 +67,14 @@ template <typename T, size_t buffer_size, typename S>
 void RingBuffer<T, buffer_size, S>::add(T value)
 {
    m_buffer[m_writeIndex] = value;
-   m_writeIndex = getNextIndex(m_writeIndex); // set write position
-   if (m_count < capacity()) // set number of entries filled
+   m_writeIndex = getNextIndex(m_writeIndex);  // set write position
+   if (m_count < capacity())                   // set number of entries filled
       ++m_count;
 }
 
 template <typename T, size_t buffer_size, typename S>
 typename RingBuffer<T, buffer_size, S>::size_type
-    RingBuffer<T, buffer_size, S>::lastInsertedElementIndex() const
+RingBuffer<T, buffer_size, S>::lastInsertedElementIndex() const
 {
    return getPreviousIndex(m_writeIndex);
 }
@@ -81,7 +87,7 @@ T RingBuffer<T, buffer_size, S>::elementAt(const size_type index) const
 
 template <typename T, size_t buffer_size, typename S>
 typename RingBuffer<T, buffer_size, S>::size_type
-    RingBuffer<T, buffer_size, S>::elementCount() const
+RingBuffer<T, buffer_size, S>::elementCount() const
 {
    return m_count;
 }
