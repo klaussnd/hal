@@ -20,7 +20,7 @@
  *
  *  @note The size of the ring buffer _must_ be a power of 2!
  */
-template <typename T, size_t buffer_size, typename S = uint8_t>
+template <typename T, uint8_t buffer_size, typename S = uint8_t>
 class RingBuffer
 {
 public:
@@ -55,7 +55,7 @@ private:
    T m_buffer[buffer_size];
 };
 
-template <typename T, size_t buffer_size, typename S>
+template <typename T, uint8_t buffer_size, typename S>
 RingBuffer<T, buffer_size, S>::RingBuffer()
       : m_writeIndex(0)
       , m_count(0)
@@ -63,7 +63,7 @@ RingBuffer<T, buffer_size, S>::RingBuffer()
    static_assert(buffer_size % 2 == 0, "Buffer size must be a multiple of 2");
 }
 
-template <typename T, size_t buffer_size, typename S>
+template <typename T, uint8_t buffer_size, typename S>
 void RingBuffer<T, buffer_size, S>::add(T value)
 {
    m_buffer[m_writeIndex] = value;
@@ -72,27 +72,27 @@ void RingBuffer<T, buffer_size, S>::add(T value)
       ++m_count;
 }
 
-template <typename T, size_t buffer_size, typename S>
+template <typename T, uint8_t buffer_size, typename S>
 typename RingBuffer<T, buffer_size, S>::size_type
 RingBuffer<T, buffer_size, S>::lastInsertedElementIndex() const
 {
    return getPreviousIndex(m_writeIndex);
 }
 
-template <typename T, size_t buffer_size, typename S>
+template <typename T, uint8_t buffer_size, typename S>
 T RingBuffer<T, buffer_size, S>::elementAt(const size_type index) const
 {
    return m_buffer[index];
 }
 
-template <typename T, size_t buffer_size, typename S>
+template <typename T, uint8_t buffer_size, typename S>
 typename RingBuffer<T, buffer_size, S>::size_type
 RingBuffer<T, buffer_size, S>::elementCount() const
 {
    return m_count;
 }
 
-template <typename T, size_t buffer_size, typename S>
+template <typename T, uint8_t buffer_size, typename S>
 bool RingBuffer<T, buffer_size, S>::isFull() const
 {
    return capacity() == m_count;
