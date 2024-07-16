@@ -1,6 +1,6 @@
 # Hardware abstraction layer with common interface for AVR and Linux
 
-This is a hardware abstraction layer written in C++ which aims at providing a common API for basic hardware functions for both [AVR](https://en.wikipedia.org/wiki/AVR_microcontrollers) microcontrollers and Linux based single-board computers like the Raspberry Pi or Beagle Bone. The aim is to have an API which is as similar as possible on both platforms, such that code on top of the API like sensor drivers can be re-used for both platforms.
+This is a hardware abstraction layer written in C++ which aims at providing a common API for basic hardware functions for both [AVR](https://en.wikipedia.org/wiki/AVR_microcontrollers) microcontrollers and Linux based single-board computers like the Raspberry Pi or Beagle Bone. The aim is to have an API which is as similar as possible on both platforms, such that code on top of the API like sensor drivers can be re-used for both platforms. There is even an Arduino compatibility layer (for now only for i2c).
 
 The project uses C++17 and thus requires a C++17 compatible compiler. On AVR, you might need to [obtain a compatible toolchain](https://github.com/modm-io/avr-gcc), since the avr-gcc shipped with common Linux distributions is too old. For AVR, the [standard C++ library provided by modm](https://github.com/modm-io/avr-libstdcpp.git) and an [AVR CMake toolchain file](https://github.com/mkleemann/cmake-avr.git) are used as submodules.
 
@@ -32,7 +32,7 @@ The following sensors are currently supported:
 
 # Tests and examples
 
-In `tests`, there are test firmware for AVR (`avr`), test programs for Linux (`linux`), unit tests for testable components (`unit`), as well as scripts for the evaluation of test data acquisitions (`script`). The test firmware and apps can be used as examples on how to use the hardware abstraction layer.
+In `tests`, there are test firmware for AVR (`avr`), test programs for Linux (`linux`), test firmware for Arduino with platformio (`arduino`), unit tests for testable components (`unit`), as well as scripts for the evaluation of test data acquisitions (`script`). The test firmware and apps can be used as examples on how to use the hardware abstraction layer.
 
 # License
 

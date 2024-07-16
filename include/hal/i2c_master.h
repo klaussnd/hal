@@ -26,10 +26,12 @@ enum class I2cStatus : uint8_t
 };
 
 /** Initialise i2c interface */
-#ifdef __AVR
+#if defined __AVR || defined(ESP8266)
 bool i2cMasterInit();
 #elif defined __linux
 bool i2cMasterInit(const char* device);
+#else
+#warning Undefined platform
 #endif
 
 /** Send data to i2c
