@@ -62,18 +62,18 @@ avr_target_compile_definitions(test_rotary_encoder
         BUTTON_MASK=0x40
 )
 
-add_avr_executable(test_button_toggle
-   test_button_toggle.cpp
+add_avr_executable(test_button
+   test_button.cpp
    ${SOURCE_DIR}/hal/avr/input/button.cpp
    ${SOURCE_DIR}/hal/avr/usart_irq.cpp
    ${SOURCE_DIR}/hal/avr/usart_stdout.c
 )
-avr_target_include_directories(test_button_toggle
+avr_target_include_directories(test_button
     PRIVATE
         ${INC_DIR}
         ${STDCPP_INC_DIR}
 )
-avr_target_compile_definitions(test_button_toggle
+avr_target_compile_definitions(test_button
     PRIVATE
         BUTTON_PORT=D
         BUTTON_MASK=0x40
