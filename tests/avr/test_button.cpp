@@ -7,7 +7,9 @@
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 
-#define BUTTON (1 << 6)
+#define BUTTON_A (1 << 4)
+#define BUTTON_B (1 << 5)
+#define BUTTON_TOGGLE (1 << 6)
 
 void initTimer0To10msIrq();
 
@@ -20,9 +22,20 @@ int main(void)
 
    while (1)
    {
-      if (buttonToggle(BUTTON))
+      if (buttonToggle(BUTTON_TOGGLE))
       {
          usartWriteString_P(PSTR("switch\n"));
+      }
+
+      const auto btn_short = buttonShort(BUTTON_A | BUTTON_B);
+      if (btn_short != 0)
+      {
+         fprintf_P(usart_stdout, PSTR("short 0x%x\n"), btn_short);
+      }
+      const auto btn_long = buttonLong(BUTTON_A | BUTTON_B);
+      if (btn_long != 0)
+      {
+         fprintf_P(usart_stdout, PSTR("long 0x%x\n"), btn_long);
       }
    }
 
