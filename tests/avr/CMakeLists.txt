@@ -76,9 +76,8 @@ avr_target_include_directories(test_button
 avr_target_compile_definitions(test_button
     PRIVATE
         BUTTON_PORT=D
-        BUTTON_MASK=0x40
+        BUTTON_MASK=0x70
         BUTTON_HAVE_TOGGLE=1
-        BUTTON_HAVE_NO_PRESS
 )
 
 add_avr_executable(test_i2c_si7021
