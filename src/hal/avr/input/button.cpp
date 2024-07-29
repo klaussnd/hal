@@ -171,7 +171,10 @@ void buttonSample(void)
    static uint8_t ct0, ct1;
 
    uint8_t i = PIN(BUTTON_PORT);  // sample buttons, 0 = down
-   i = button_state ^ ~i;         // button changed ?
+#ifndef BUTTON_ACTIVE_HIGH
+   i = ~i;
+#endif
+   i = button_state ^ i;          // button changed ?
    ct0 = ~(ct0 & i);              // reset or count ct0
    ct1 = ct0 ^ (ct1 & i);         // reset or count ct1
    i &= ct0 & ct1;                // count until roll over ?
