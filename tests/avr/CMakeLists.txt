@@ -37,10 +37,6 @@ avr_target_include_directories(test_adc
     PRIVATE
         ${INC_DIR}
 )
-avr_target_compile_definitions(test_adc
-    PRIVATE
-        ADC_REF_AVCC=1
-)
 
 add_avr_executable(test_rotary_encoder
    test_rotary_encoder.cpp

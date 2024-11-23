@@ -4,12 +4,15 @@
 
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <avr/sleep.h>
 #include <util/delay.h>
 
 #include <stdlib.h>
 
 int main(void)
 {
+   adcSetReference(AdcReference::AVCC);
+   set_sleep_mode(SLEEP_MODE_ADC);
    usartInit<19200>();
    sei();
 
