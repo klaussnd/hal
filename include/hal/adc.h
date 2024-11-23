@@ -12,17 +12,28 @@
  *  GNU Affero General Public License for more details.
  */
 
-#ifndef ADC_H
-#define ADC_H
+#pragma once
 
 #include <inttypes.h>
 
+#ifdef __AVR
+#include "avr/adc_priv.h"
+
+enum class AdcReference : uint8_t
+{
+   AVCC = ADC_REF_AVCC,                  ///< AVcc with external capacitor on AREF pin
+   INTERNAL_BANDGAP = ADC_REF_INTERNAL,  ///< internal band gap 1.1V or 2.56V
+   EXTERNAL_AREF = ADC_REF_EXTERNAL,     ///< external reference on AREF
+};
+/** Set the reference for the analogue-digital converter */
+void adcSetReference(AdcReference ref);
+#endif
+
 /** Read from the analogue-digital converter (ADC)
- *  @param channel  The ADC channel to read
+ *  @param channel     The ADC channel to read
+ *  @param meas_count  Number of measurements to average
  *  @note On AVR, the MCU is set into sleep mode to reduce noise during the conversion.
  *        It is the caller's responsibility to select the correct sleep mode before
  *        calling this function.
  */
-uint16_t adcRead(uint8_t channel);
-
-#endif
+uint16_t adcRead(uint8_t channel, uint8_t meas_count = 1);
