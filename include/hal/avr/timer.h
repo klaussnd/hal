@@ -71,12 +71,6 @@
 /** set timer to normal mode */
 #define TMR_SET_NORMAL(tmr_no) TMR_SET_NORMAL_X(tmr_no)
 
-/** set timer to CTC mode
- *  for timer0 and timer2, top = OCRn
- *  for timer1, top = ICR1
- */
-#define TMR_SET_CTC(tmr_no) TMR_SET_CTC_X(tmr_no)
-
 /** Set timer @e tmr_no prescaler to value @e pre
  *  and thereby also starts the timer
  *  @e pre must be a valid prescaler factor
@@ -174,10 +168,6 @@
    TCCR ## tmr_no ## A = 0; \
    TCCR ## tmr_no ## B &= ~(1<<WGM ## tmr_no ## 2)
 
-#define TMR_SET_CTC_X(tmr_no) \
-   TCCR ## tmr_no ## A = (1<<WGM ## tmr_no ## 1); \
-   TCCR ## tmr_no ## B &= ~(1<<WGM ## tmr_no ## 2)
-
 #define TMR_SET_OCR_X(tmr_no, ch, val) \
    OCR ## tmr_no ## ch = val
 
@@ -213,10 +203,6 @@
 #define TMR_TCCR2 TCCR2
 #define TMR_SET_PRE(tmr_no, pre) \
    TMR_TCCR ## tmr_no = ((TMR_TCCR ## tmr_no) & ~(TMR ## tmr_no ## _PRE_MASK)) | (TMR ## tmr_no ## _PRE_ ## pre)
-
-#define TMR_SET_CTC_X(tmr_no) \
-   TCCR ## tmr_no &= ~(1<<WGM ## tmr_no ## 0); \
-   TCCR ## tmr_no |= (1<<WGM ## tmr_no ## 1)
 
 #if defined __AVR_ATmega32__ || defined __AVR_ATmega16__
  #define TMR0_OCR(ch) OCR0
