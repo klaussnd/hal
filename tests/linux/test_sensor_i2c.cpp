@@ -1,4 +1,5 @@
 #include <hal/i2c_master.h>
+#include <hal/sensor/adt7410.h>
 #include <hal/sensor/hyt939.h>
 #include <hal/sensor/si1145.h>
 #include <hal/sensor/si7021.h>
@@ -24,7 +25,12 @@ int main(int argc, char** argv)
    const bool has_si7021 = si7021Init();
    const bool has_veml6075 = veml6075Init();
    const bool has_si1145 = si1145Init();
+   const bool has_adt7410 = adt7410Init();
 
+   if (has_adt7410)
+   {
+      std::cout << "ADT7410 temperature sensor found" << std::endl;
+   }
    if (has_veml6075)
    {
       std::cout << "UV sensor found" << std::endl;
@@ -38,6 +44,13 @@ int main(int argc, char** argv)
    {
       std::cout << std::time(nullptr) << ',';
 
+      if (has_adt7410)
+      {
+         if (const auto temp = adt7410ReadTemp(); temp.has_value())
+         {
+            std::cout << temp.value() / 10.0 << ',';
+         }
+      }
       const auto hyt939_data = hyt939Measure();
       if (hyt939_data)
       {
