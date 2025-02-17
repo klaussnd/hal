@@ -1,4 +1,5 @@
 #include <hal/i2c_master.h>
+#include <hal/sensor/abp2.h>
 #include <hal/sensor/adt7410.h>
 #include <hal/sensor/hyt939.h>
 #include <hal/sensor/si1145.h>
@@ -42,6 +43,46 @@ int main(int argc, char** argv)
 
    while (1)
    {
+      if (const auto result = abp2StartMeasurement(); result == I2cStatus::SUCCESS)
+      {
+         std::cout << "ABP2 found, started measurement\n";
+         std::this_thread::sleep_for(std::chrono::milliseconds(10));
+         bool busy = true;
+         while (busy)
+         {
+            const auto result = abp2GetMeasurement();
+            if (std::holds_alternative<Abp2RawData>(result))
+            {
+               const auto& raw = std::get<Abp2RawData>(result);
+               constexpr double outputmax =
+                  15099494;  // output at maximum pressure [counts]
+               constexpr double outputmin =
+                  1677722;  // output at minimum pressure [counts]
+               constexpr double one_psi_in_bar = 0.068947573;
+               // pressure range
+               constexpr double pmax = 60 * one_psi_in_bar;
+               constexpr double pmin = 0;
+               const double pressure =
+                  ((raw.pressure - outputmin) * (pmax - pmin)) / (outputmax - outputmin)
+                  + pmin;
+               const double temperature = (raw.temperature * 200. / 16777215.) - 50.;
+               std::cout << "ABP2 raw pressure " << raw.pressure << ", raw temp "
+                         << raw.temperature << '\n'
+                         << "pressure " << pressure << " bar, temp " << temperature
+                         << " Celsius" << std::endl;
+               busy = false;
+            }
+            else
+            {
+               const auto& status = std::get<Abp2Status>(result);
+               if (status == Abp2Status::I2C_FAILURE)
+               {
+                  std::cerr << "I2C failure reading from ABP2" << std::endl;
+                  busy = false;
+               }
+            }
+         }
+      }
       if (has_adt7410)
       {
          if (const auto temp = adt7410ReadTemp(); temp.has_value())
