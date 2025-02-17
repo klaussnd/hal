@@ -20,6 +20,7 @@ target_include_directories(test_usart
 add_executable(test_sensor_i2c
     test_sensor_i2c.cpp
     ${SOURCE_DIR}/hal/linux/i2c_master.cpp
+    ${SOURCE_DIR}/hal/sensor/abp2.cpp
     ${SOURCE_DIR}/hal/sensor/adt7410.cpp
     ${SOURCE_DIR}/hal/sensor/hyt939.cpp
     ${SOURCE_DIR}/hal/sensor/si1145.cpp

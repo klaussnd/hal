@@ -29,6 +29,7 @@ The following sensors are currently supported:
 * ADT7410 temperature sensor ([datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/adt7410.pdf))
 * SHT3x temperature and humidity sensor ([datasheet](https://sensirion.com/resource/datasheet/sht3x-d))
 * MH-Z19 CO2 sensor ([datasheet](https://www.winsen-sensor.com/d/files/infrared-gas-sensor/mh-z19b-co2-ver1_0.pdf))
+* Honeywell ABP2 series pressure sensor ([datasheet](https://prod-edam.honeywell.com/content/dam/honeywell-edam/sps/siot/en-us/products/sensors/pressure-sensors/board-mount-pressure-sensors/basic-abp2-series/documents/sps-siot-abp2-series-datasheet-32350268-en.pdf))
 
 # Tests and examples
 
