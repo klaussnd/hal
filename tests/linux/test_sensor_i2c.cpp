@@ -42,34 +42,24 @@ int main(int argc, char** argv)
 
    while (1)
    {
-      std::cout << std::time(nullptr) << ',';
-
       if (has_adt7410)
       {
          if (const auto temp = adt7410ReadTemp(); temp.has_value())
          {
-            std::cout << temp.value() / 10.0 << ',';
+            std::cout << "ADT7410 " << temp.value() / 10.0 << std::endl;
          }
       }
       const auto hyt939_data = hyt939Measure();
       if (hyt939_data)
       {
-         std::cout << hyt939_data->temperature / 10.0 << ','
-                   << static_cast<int>(hyt939_data->humidity) << ',';
-      }
-      else
-      {
-         std::cout << ",,";
+         std::cout << "HYT939 " << hyt939_data->temperature / 10.0 << ','
+                   << static_cast<int>(hyt939_data->humidity) << std::endl;
       }
       if (has_si7021)
       {
          const float si7021_temp = si7021Temperature() / 10.0f;
          const int si7021_hum = si7021Humidity();
-         std::cout << si7021_temp << ',' << si7021_hum << ",";
-      }
-      else
-      {
-         std::cout << ",,";
+         std::cout << "SI7021 " << si7021_temp << ',' << si7021_hum << std::endl;
       }
       if (has_veml6075)
       {
@@ -92,17 +82,15 @@ int main(int argc, char** argv)
             const double uvb = corr_uvb * UVB_RESPONSIVITY_100MS_UNCOVERED;
             const double index = (uva + uvb) / 2.0;
 
-            std::cout << data->uva << ',' << data->uvb << ',' << data->comp1 << ','
-                      << data->comp2 << ',' << uva << ',' << uvb << ',' << index << ',';
+            std::cout << "VEML6075 " << data->uva << ',' << data->uvb << ','
+                      << data->comp1 << ',' << data->comp2 << ',' << uva << ',' << uvb
+                      << ',' << index << std::endl;
          }
          else
          {
-            std::cout << "--,--,--,--,--,--,--,";
+            std::cout << "VEML6075 --,--,--,--,--,--,--" << std::endl;
+            ;
          }
-      }
-      else
-      {
-         std::cout << ",,,,,,,";
       }
       if (has_si1145)
       {
@@ -121,11 +109,9 @@ int main(int argc, char** argv)
             const double lux = static_cast<double>(raw.value() - dark_current)
                                / gain_value * extra_factor / adc_counts_per_lux;
 
-            std::cout << lux;
+            std::cout << "SI1145 " << lux << std::endl;
          }
       }
-
-      std::cout << std::endl;
 
       std::this_thread::sleep_for(std::chrono::seconds(INTERVAL));
    }
